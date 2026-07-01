@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>SafePaws Rider V2.3</title>
+<title>SafePaws Rider V2.5</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',Arial;background:#0f172a;color:#e5e7eb}
@@ -15,21 +15,27 @@
 #appScreen{display:none}
 header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#1e293b;border-bottom:1px solid #334155;position:sticky;top:0}
 .logout{background:#dc2626;border:0;color:#fff;padding:8px 12px;border-radius:8px;font-weight:bold}
-.subtabs{display:flex;background:#1e293b;border-bottom:1px solid #334155}
-.subtab{flex:1;padding:12px;text-align:center;cursor:pointer;border-bottom:3px solid transparent}
+.subtabs{display:flex;background:#1e293b;border-bottom:1px solid #334155;overflow-x:auto}
+.subtab{flex:1;padding:12px;text-align:center;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
 .subtab.active{border-bottom:3px solid #38bdf8;color:#38bdf8;font-weight:bold}
 .screen{display:none;padding:16px;padding-bottom:80px}
 .card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:12px}
+.card input{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#e5e7eb}
 #map{height:300px;border-radius:12px;margin-top:12px}
-.btn{width:100%;padding:16px;border:0;border-radius:12px;background:#16a34a;color:#fff;font-weight:bold;font-size:16px;cursor:pointer}
+.btn{width:100%;padding:16px;border:0;border-radius:12px;background:#16a34a;color:#fff;font-weight:bold;font-size:16px;cursor:pointer;margin-top:8px}
 .btn.off{background:#dc2626}
+.btn.reject{background:#dc2626}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
 .status-card{text-align:center;padding:40px 20px}
 .status-card h2{font-size:28px;margin:0}
-.pending{color:#f59e0b}.approved{color:#16a34a}
+.pending{color:#f59e0b}.approved{color:#16a34a}.active{color:#38bdf8}
 nav{position:fixed;bottom:0;left:0;right:0;background:#1e293b;border-top:1px solid #334155;display:flex}
 nav button{flex:1;padding:12px;background:0;border:0;color:#94a3b8;font-size:12px;cursor:pointer}
 nav button.active{color:#38bdf8}
 .tab{display:none}.tab.active{display:block}
+small{color:#94a3b8}
+.badge{background:#f59e0b;color:#0f172a;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:bold;margin-left:4px}
+.row{display:flex;justify-content:space-between;align-items:center;margin:4px 0}
 </style>
 </head>
 <body>
@@ -65,6 +71,7 @@ nav button.active{color:#38bdf8}
 
 <div id="subtabs" class="subtabs" style="display:none">
   <div class="subtab active" onclick="showSub('homeSub')">Home</div>
+  <div class="subtab" onclick="showSub('bookingsSub')">Bookings <span id="bookingBadge" class="badge" style="display:none">0</span></div>
   <div class="subtab" onclick="showSub('earningsSub')">Earnings</div>
   <div class="subtab" onclick="showSub('profileSub')">Profile</div>
 </div>
@@ -74,26 +81,42 @@ nav button.active{color:#38bdf8}
     <div id="pendingScreen" class="card status-card" style="display:none">
       <h2 class="pending">⏳ PENDING</h2>
       <p>Your application is under review by Admin.</p>
-      <p>Please wait for approval.</p>
     </div>
     <div id="approvedScreen" style="display:none">
       <div class="card">
         <h3 style="margin-top:0">Go Online</h3>
         <button id="onlineBtn" class="btn off" onclick="toggleOnline()">OFFLINE</button>
+        <small id="onlineStatus">Checking...</small>
       </div>
       <div id="map"></div>
     </div>
   </div>
+
+  <!-- BOOKINGS TAB - ITO YUNG BAGO -->
+  <div id="bookingsSub" class="screen tab">
+    <div id="activeBooking"></div>
+    <div id="bookingsList"></div>
+  </div>
+
   <div id="earningsSub" class="screen tab">
     <div class="card"><h3>💰 Earnings</h3><p id="earningsText">₱0.00</p></div>
   </div>
+  
   <div id="profileSub" class="screen tab">
-    <div class="card"><h3>👤 Profile</h3><p id="profileText"></p></div>
+    <div class="card">
+      <h3>👤 My Profile</h3>
+      <input id="pName" placeholder="Full Name">
+      <input id="pPhone" placeholder="Phone">
+      <input id="pPlate" placeholder="Plate Number">
+      <small>Status: <span id="pStatus"></span></small>
+      <button class="login-card button" style="margin-top:12px" onclick="saveProfile()">Save Changes</button>
+    </div>
   </div>
 </main>
 
 <nav>
   <button class="active" onclick="switchTab('homeSub',this)">🏠<br>Home</button>
+  <button onclick="switchTab('bookingsSub',this)">📦<br>Bookings</button>
   <button onclick="switchTab('earningsSub',this)">💰<br>Earnings</button>
   <button onclick="switchTab('profileSub',this)">👤<br>Profile</button>
 </nav>
@@ -103,12 +126,9 @@ nav button.active{color:#38bdf8}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ========================================
-   🔥 LAGAY MO DITO YUNG FIREBASE CONFIG MO 🔥
-   Copy mo galing Firebase Console > Project Settings
-======================================== */
+/* 🔥 LAGAY MO DITO YUNG FIREBASE CONFIG MO 🔥 */
 const firebaseConfig = {
   apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os",
   authDomain: "safepaws-batangas.firebaseapp.com",
@@ -117,12 +137,11 @@ const firebaseConfig = {
   messagingSenderId: "629904615191",
   appId: "1:629904615191:web:45f7148d65ba61a867f952"
 };
-/* ======================================== */
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-let map, marker, uid;
+let map, marker, uid, riderData, activeBookingId;
 
 onAuthStateChanged(auth, async user=>{
   if(user){
@@ -131,6 +150,7 @@ onAuthStateChanged(auth, async user=>{
     document.getElementById('signupScreen').style.display='none';
     document.getElementById('appScreen').style.display='block';
     checkStatus();
+    listenBookings();
   }else{
     document.getElementById('loginScreen').style.display='flex';
     document.getElementById('appScreen').style.display='none';
@@ -141,16 +161,27 @@ async function checkStatus(){
   const ref = doc(db,'riders',uid);
   onSnapshot(ref, snap=>{
     if(!snap.exists()) return;
-    const r = snap.data();
-    document.getElementById('profileText').textContent = `${r.name} | ${r.plate} | ${r.status}`;
-    document.getElementById('earningsText').textContent = `₱${r.earnings||0}`;
-    if(r.status==='approved'){
+    riderData = snap.data();
+    document.getElementById('pName').value = riderData.name || '';
+    document.getElementById('pPhone').value = riderData.phone || '';
+    document.getElementById('pPlate').value = riderData.plate || '';
+    document.getElementById('pStatus').textContent = riderData.status || '';
+    document.getElementById('earningsText').textContent = `₱${riderData.earnings||0}`;
+
+    if(riderData.status==='approved'){
       document.getElementById('subtabs').style.display='flex';
       document.getElementById('pendingScreen').style.display='none';
       document.getElementById('approvedScreen').style.display='block';
       if(!map) initMap();
-      if(r.online){document.getElementById('onlineBtn').classList.remove('off');document.getElementById('onlineBtn').textContent='ONLINE';}
-      else{document.getElementById('onlineBtn').classList.add('off');document.getElementById('onlineBtn').textContent='OFFLINE';}
+      const btn = document.getElementById('onlineBtn');
+      btn.disabled = false;
+      if(riderData.online){
+        btn.classList.remove('off');btn.textContent='ONLINE';
+        document.getElementById('onlineStatus').textContent='You are visible to customers';
+      }else{
+        btn.classList.add('off');btn.textContent='OFFLINE';
+        document.getElementById('onlineStatus').textContent='You are hidden';
+      }
     }else{
       document.getElementById('subtabs').style.display='none';
       document.getElementById('pendingScreen').style.display='block';
@@ -158,6 +189,83 @@ async function checkStatus(){
     }
   });
 }
+
+// BOOKINGS LISTENER - ITO YUNG IMPORTANTE
+function listenBookings(){
+  const q = query(collection(db,'bookings'), where('assignedRider','==',uid));
+  onSnapshot(q, snap=>{
+    const bookings = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const active = bookings.find(b=>b.status==='assigned' || b.status==='accepted' || b.status==='picking');
+    const pending = bookings.filter(b=>b.status==='assigned');
+    
+    document.getElementById('bookingBadge').style.display = pending.length>0?'inline-block':'none';
+    document.getElementById('bookingBadge').textContent = pending.length;
+
+    // ACTIVE BOOKING
+    if(active){
+      activeBookingId = active.id;
+      document.getElementById('activeBooking').innerHTML = `
+        <div class="card" style="border:2px solid #38bdf8">
+          <h3 class="active">🚨 ACTIVE BOOKING</h3>
+          <div class="row"><b>Customer:</b> ${active.customerName}</div>
+          <div class="row"><b>Phone:</b> <a href="tel:${active.customerPhone}" style="color:#38bdf8">${active.customerPhone}</a></div>
+          <div class="row"><b>Pet:</b> ${active.petName} - ${active.petBreed} (${active.petSize})</div>
+          <div class="row"><b>Pick-up:</b> ${active.pickup}</div>
+          <div class="row"><b>Drop-off:</b> ${active.dropoff}</div>
+          <div class="row"><b>Fee:</b> ₱${active.fee}</div>
+          ${active.status==='assigned' ? `
+            <button class="btn" onclick="acceptBooking('${active.id}')">Accept</button>
+            <button class="btn reject" onclick="rejectBooking('${active.id}')">Reject</button>
+          ` : active.status==='accepted' ? `
+            <button class="btn" onclick="startTrip('${active.id}')">Start Trip</button>
+          ` : active.status==='picking' ? `
+            <button class="btn" onclick="completeTrip('${active.id}')">Complete Trip</button>
+          ` : ''}
+        </div>
+      `;
+    }else{
+      document.getElementById('activeBooking').innerHTML = '<div class="card"><p>No active booking</p></div>';
+    }
+
+    // HISTORY
+    document.getElementById('bookingsList').innerHTML = bookings.filter(b=>b.status==='completed').map(b=>`
+      <div class="card"><b>${b.petName}</b> - ${b.pickup} > ${b.dropoff}<br><small>₱${b.fee} | Completed</small></div>
+    `).join('');
+  });
+}
+
+async function acceptBooking(id){
+  await updateDoc(doc(db,'bookings',id),{status:'accepted'});
+}
+window.acceptBooking=acceptBooking;
+
+async function rejectBooking(id){
+  await updateDoc(doc(db,'bookings',id),{status:'rejected',assignedRider:null});
+}
+window.rejectBooking=rejectBooking;
+
+async function startTrip(id){
+  await updateDoc(doc(db,'bookings',id),{status:'picking'});
+}
+window.startTrip=startTrip;
+
+async function completeTrip(id){
+  const snap = await getDoc(doc(db,'bookings',id));
+  const fee = snap.data().fee || 0;
+  await updateDoc(doc(db,'bookings',id),{status:'completed'});
+  await updateDoc(doc(db,'riders',uid),{earnings:(riderData.earnings||0)+fee});
+  alert(`Trip completed! +₱${fee}`);
+}
+window.completeTrip=completeTrip;
+
+async function saveProfile(){
+  const name = document.getElementById('pName').value;
+  const phone = document.getElementById('pPhone').value;
+  const plate = document.getElementById('pPlate').value;
+  await updateDoc(doc(db,'riders',uid),{name,phone,plate});
+  alert('Profile Updated!');
+}
+window.saveProfile=saveProfile;
 
 async function signup(){
   const name=document.getElementById('name').value;
@@ -193,7 +301,7 @@ function switchTab(id,btn){
 window.switchTab=switchTab;
 
 function showSub(id){
-  document.querySelectorAll('#homeSub.tab,#earningsSub,#profileSub').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#homeSub.tab,#bookingsSub,#earningsSub,#profileSub').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.subtab').forEach(b=>b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   event.target.classList.add('active');
@@ -207,17 +315,23 @@ function initMap(){
   navigator.geolocation.watchPosition(p=>{
     const {latitude:lat,longitude:lng}=p.coords;
     marker.setLatLng([lat,lng]); map.setView([lat,lng]);
-    if(uid) updateDoc(doc(db,'riders',uid),{lat,lng});
+    if(uid && riderData?.online) updateDoc(doc(db,'riders',uid),{lat,lng});
   });
 }
 
 async function toggleOnline(){
-  const ref=doc(db,'riders',uid);
-  const snap=await getDoc(ref);
-  const on=!snap.data().online;
-  await updateDoc(ref,{online:on});
+  const btn = document.getElementById('onlineBtn');
+  btn.disabled = true;
+  try{
+    const ref=doc(db,'riders',uid);
+    const snap=await getDoc(ref);
+    const on=!snap.data().online;
+    await updateDoc(ref,{online:on});
+  }catch(e){
+    alert('Error: '+e.message);
+    btn.disabled = false;
+  }
 }
 window.toggleOnline=toggleOnline;
 </script>
-</body>
-</html>
+</body></html>
