@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#16a34a">
+<title>SafePaws Rider</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',Arial;background:#f5f5f5;overflow:hidden}
+#splash{position:fixed;inset:0;background:#16a34a;display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeOut 1s 1.5s forwards}
+#splash h1{color:#fff;font-size:32px;animation:pop .6s ease}
+@keyframes pop{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes fadeOut{to{opacity:0;visibility:hidden}}
+.screen{height:100vh;display:none}
+.card{background:#fff;padding:20px;border-radius:16px;box-shadow:0 4px 12px #0001}
+input,button{width:100%;padding:14px;margin:8px 0;border-radius:12px;border:1px solid #ddd;font-size:16px}
+button{background:#16a34a;color:#fff;border:0;font-weight:bold;transition:.2s}
+button:active{transform:scale(.97)}
+.toggle{padding:10px 18px;border-radius:24px;color:#fff;font-weight:bold}
+.online{background:#16a34a}.offline{background:#6b7280}
+#map{height:50vh;border-radius:12px;margin:12px}
+header{padding:12px 16px;background:#fff;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 6px #0001}
+#popup{position:fixed;bottom:-100%;left:0;right:0;background:#fff;padding:16px;border-radius:20px 20px 0 0;box-shadow:0 -6px 20px #0003;transition:.3s;z-index:1000}
+#popup.show{bottom:0}
+.row{display:flex;gap:8px}.row button{flex:1}
+.badge{font-size:12px;background:#eee;padding:4px 10px;border-radius:20px}
+</style>
+</head>
+<body>
+<div id="splash"><h1>🐾 SafePaws</h1></div>
+<div id="loginScreen" class="screen" style="display:flex;align-items:center;justify-content:center;">
+<div class="card" style="width:90%;max-width:360px"><h2>🐾 Rider Login</h2>
+<input id="email" type="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Password">
+<button onclick="login()">Login</button></div></div>
+<div id="pendingScreen" class="screen" style="align-items:center;justify-content:center;">
+<div class="card" style="width:90%;max-width:360px;text-align:center"><h2>⏳ Pending</h2><p>Wait for Admin approval.</p><button onclick="logout()">Logout</button></div></div>
+<div id="app" class="screen">
+<header><div><div style="font-weight:bold" id="riderName">Kuya Rider</div><div class="badge" id="riderStatus">Offline</div></div>
+<div style="text-align:right"><div style="font-size:12px">Earnings</div><div style="font-weight:bold">₱<span id="earnings">0.00</span></div>
+<button id="toggleBtn" class="toggle offline" onclick="toggleOnline()">OFFLINE</button></div></header>
+<div id="map"></div>
+<div style="padding:12px"><button id="arriveBtn" style="display:none;background:#2563eb" onclick="arrived()">📍 Arrived</button>
+<button id="endBtn" style="display:none" onclick="endTrip()">✅ End Trip</button></div></div>
+<div id="popup"><div style="font-weight:bold;font-size:18px;margin-bottom:8px" id="popupTitle">New Booking</div>
+<div id="popupBody"></div><div class="row" style="margin-top:12px">
+<button style="background:#dc2626" onclick="rejectBooking()">Reject</button>
+<button onclick="acceptBooking()">Accept</button></div></div>
+
+<!-- BAGO: FIREBASE SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// BAGO: CONFIG MO DITO BES
+const firebaseConfig = {
+  apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os",
+  authDomain: "safepaws-batangas.firebaseapp.com",
+  projectId: "safepaws-batangas",
+  storageBucket: "safepaws-batangas.firebasestorage.app",
+  messagingSenderId: "629904615191",
+  appId: "1:629904615191:web:45f7148d65ba61a867f952"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.auth = auth;
+window.db = db;
+window.signIn = signInWithEmailAndPassword;
+window.signOut = signOut;
+window.onAuth = onAuthStateChanged;
+window.doc = doc;
+window.getDoc = getDoc;
+window.updateDoc = updateDoc;
+window.onSnap = onSnapshot;
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
