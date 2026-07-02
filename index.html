@@ -2,12 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>SafePaws Rider V2.5</title>
+<title>SafePaws Rider V2.8</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',Arial;background:#0f172a;color:#e5e7eb;overflow:hidden}
-
-/* BAGO: SPLASH ANIMATION */
 #splash{position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeOut.5s ease 1.5s forwards}
 #splash div{font-size:100px;animation:pop.8s cubic-bezier(.68,-.55,.265,1.55)}
 @keyframes pop{0%{transform:scale(.5);opacity:0}100%{transform:scale(1);opacity:1}}
@@ -21,33 +19,32 @@
 .link{color:#38bdf8;text-align:center;margin-top:10px;cursor:pointer}
 #appScreen{display:none}
 header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#1e293b;border-bottom:1px solid #334155;position:sticky;top:0}
+
+/* TINANGGAL: .subtabs .subtab */
 .logout{background:#dc2626;border:0;color:#fff;padding:8px 12px;border-radius:8px;font-weight:bold}
-.subtabs{display:flex;background:#1e293b;border-bottom:1px solid #334155;overflow-x:auto}
-.subtab{flex:1;padding:12px;text-align:center;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
-.subtab.active{border-bottom:3px solid #38bdf8;color:#38bdf8;font-weight:bold}
-.screen{display:none;padding:16px;padding-bottom:80px}
-.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:12px}
+.screen{display:none;padding:16px;padding-bottom:100px} /* +padding sa baba */
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:12px;text-align:left}
+.card.center{text-align:center;padding:40px 20px} /* BAGO: For status cards */
 .card input{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#e5e7eb}
 #map{height:300px;border-radius:12px;margin-top:12px}
 .btn{width:100%;padding:16px;border:0;border-radius:12px;background:#16a34a;color:#fff;font-weight:bold;font-size:16px;cursor:pointer;margin-top:8px}
 .btn.off{background:#dc2626}
 .btn.reject{background:#dc2626}
 .btn:disabled{opacity:0.5;cursor:not-allowed}
-.status-card{text-align:center;padding:40px 20px}
-.status-card h2{font-size:28px;margin:0}
-.pending{color:#f59e0b}.approved{color:#16a34a}.active{color:#38bdf8}
-nav{position:fixed;bottom:0;left:0;right:0;background:#1e293b;border-top:1px solid #334155;display:flex}
+.status-card h2{font-size:32px;margin:0 0 10px}
+.pending{color:#f59e0b}.approved{color:#16a34a}.rejected{color:#dc2626}.active{color:#38bdf8}
+nav{position:fixed;bottom:0;left:0;right:0;background:#1e293b;border-top:1px solid #334155;display:flex;z-index:10}
 nav button{flex:1;padding:12px;background:0;border:0;color:#94a3b8;font-size:12px;cursor:pointer}
-nav button.active{color:#38bdf8}
+nav button.active{color:#38bdf8;background:#0f172a}
 .tab{display:none}.tab.active{display:block}
 small{color:#94a3b8}
-.badge{background:#f59e0b;color:#0f172a;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:bold;margin-left:4px}
-.row{display:flex;justify-content:space-between;align-items:center;margin:4px 0}
+.badge{background:#dc2626;color:#fff;padding:2px 6px;border-radius:50%;font-size:10px;margin-left:4px;vertical-align:top}
+.row{display:flex;justify-content:space-between;align-items:center;margin:6px 0}
+.muted{color:#94a3b8;font-size:14px;line-height:1.6}
 </style>
 </head>
 <body>
 
-<!-- BAGO: SPLASH -->
 <div id="splash"><div>🏍️</div></div>
 
 <div id="loginScreen">
@@ -78,50 +75,84 @@ small{color:#94a3b8}
   <h3 id="headerTitle">🏠 Home</h3>
   <button class="logout" onclick="logout()">Logout</button>
 </header>
-<div id="subtabs" class="subtabs" style="display:none">
-  <div class="subtab active" onclick="showSub('homeSub')">Home</div>
-  <div class="subtab" onclick="showSub('bookingsSub')">Bookings <span id="bookingBadge" class="badge" style="display:none">0</span></div>
-  <div class="subtab" onclick="showSub('earningsSub')">Earnings</div>
-  <div class="subtab" onclick="showSub('profileSub')">Profile</div>
-</div>
+
+<!-- TINANGGAL: <div id="subtabs"> -->
+
 <main>
-  <div id="homeSub" class="screen tab active">
-    <div id="pendingScreen" class="card status-card" style="display:none">
-      <h2 class="pending">⏳ PENDING</h2>
-      <p>Your application is under review by Admin.</p>
+  <!-- TAB 1: HOME = STATUS CENTER NA -->
+  <div id="homeTab" class="screen tab active">
+    
+    <!-- STATE 1: PENDING -->
+    <div id="pendingScreen" class="card center" style="display:none">
+      <h2 class="pending">⏳ Application Submitted</h2>
+      <p class="muted">Status: <b>Pending Review</b></p>
+      <div class="card" style="text-align:left;margin-top:20px">
+        <b>What happens next?</b>
+        <div class="muted" style="margin-top:8px">
+          1. Admin will review your documents in <b>24-48 hours</b><br>
+          2. You'll get notified here once approved<br>
+          3. You can go online after approval
+        </div>
+      </div>
+      <small>Need help? safepaws.support@gmail.com</small>
     </div>
+
+    <!-- STATE 2: REJECTED -->
+    <div id="rejectedScreen" class="card center" style="display:none">
+      <h2 class="rejected">❌ Application Rejected</h2>
+      <p class="muted">Status: <b>Rejected</b></p>
+      <div class="card" style="text-align:left;margin-top:20px;background:#2c1a1a;border-color:#dc2626">
+        <b>Reason:</b> <span id="rejectReason" class="muted">Invalid documents</span>
+      </div>
+      <button class="btn" onclick="alert('Contact admin to resubmit')">Contact Admin</button>
+    </div>
+
+    <!-- STATE 3: APPROVED -->
     <div id="approvedScreen" style="display:none">
+      <div class="card center">
+        <h2 class="approved">✅ You're Approved!</h2>
+        <p class="muted">Welcome to SafePaws, <span id="riderName"></span>!</p>
+      </div>
       <div class="card">
         <h3 style="margin-top:0">Go Online</h3>
         <button id="onlineBtn" class="btn off" onclick="toggleOnline()">OFFLINE</button>
-        <small id="onlineStatus">Checking...</small>
+        <small id="onlineStatus">Tap to start accepting bookings</small>
       </div>
       <div id="map"></div>
     </div>
+
   </div>
-  <div id="bookingsSub" class="screen tab">
+
+  <!-- TAB 2: BOOKINGS -->
+  <div id="bookingsTab" class="screen tab">
     <div id="activeBooking"></div>
     <div id="bookingsList"></div>
   </div>
-  <div id="earningsSub" class="screen tab">
-    <div class="card"><h3>💰 Earnings</h3><p id="earningsText">₱0.00</p></div>
+
+  <!-- TAB 3: EARNINGS -->
+  <div id="earningsTab" class="screen tab">
+    <div class="card"><h3>💰 Earnings</h3><p id="earningsText" style="font-size:28px;font-weight:bold">₱0.00</p></div>
   </div>
-  <div id="profileSub" class="screen tab">
+
+  <!-- TAB 4: PROFILE -->
+  <div id="profileTab" class="screen tab">
     <div class="card">
       <h3>👤 My Profile</h3>
       <input id="pName" placeholder="Full Name">
       <input id="pPhone" placeholder="Phone">
       <input id="pPlate" placeholder="Plate Number">
       <small>Status: <span id="pStatus"></span></small>
-      <button class="login-card button" style="margin-top:12px" onclick="saveProfile()">Save Changes</button>
+      <button class="btn" style="margin-top:12px" onclick="saveProfile()">Save Changes</button>
     </div>
   </div>
 </main>
+
+<!-- BOTTOM NAV LANG. 1 LANG -->
 <nav>
-  <button class="active" onclick="switchTab('homeSub',this)">🏠<br>Home</button>
-  <button onclick="switchTab('bookingsSub',this)">📦<br>Bookings</button>
-  <button onclick="switchTab('earningsSub',this)">💰<br>Earnings</button>
-  <button onclick="switchTab('profileSub',this)">👤<br>Profile</button>
+  <button class="active" onclick="switchTab('homeTab',this)">🏠<br>Home</button>
+  <button onclick="switchTab('bookingsTab',this)">📦<br>Bookings<span id="bookingBadge" class="badge" style="display:none">0</span></button>
+  <button onclick="switchTab('earningsTab',this)">💰<br>Earnings</button>
+  <button onclick="switchTab('profileTab',this)">👤<br>Profile</button>
 </nav>
 </div>
 
@@ -131,14 +162,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
- apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os",
-  authDomain: "safepaws-batangas.firebaseapp.com",
-  projectId: "safepaws-batangas",
-  storageBucket: "safepaws-batangas.firebasestorage.app",
-  messagingSenderId: "629904615191",
-  appId: "1:629904615191:web:45f7148d65ba61a867f952"
-};
+const firebaseConfig = { apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os", authDomain: "safepaws-batangas.firebaseapp.com", projectId: "safepaws-batangas", storageBucket: "safepaws-batangas.firebasestorage.app", messagingSenderId: "629904615191", appId: "1:629904615191:web:45f7148d65ba61a867f952" };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -147,17 +171,16 @@ let map, marker, uid, riderData, activeBookingId;
 onAuthStateChanged(auth, async user=>{
  if(user){
   uid=user.uid;
-  // BAGO: Tanggalin splash after 1.6s
-  setTimeout(()=>{document.getElementById('splash').style.display='none';},1600);
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('signupScreen').style.display='none';
-  document.getElementById('appScreen').style.display='block';
+  setTimeout(()=>{splash.style.display='none';},1600);
+  loginScreen.style.display='none';
+  signupScreen.style.display='none';
+  appScreen.style.display='block';
   checkStatus();
   listenBookings();
  }else{
-  document.getElementById('splash').style.display='flex'; // BAGO: Pakita ulit splash pag logout
-  document.getElementById('loginScreen').style.display='flex';
-  document.getElementById('appScreen').style.display='none';
+  splash.style.display='flex';
+  loginScreen.style.display='flex';
+  appScreen.style.display='none';
  }
 });
 
@@ -166,29 +189,34 @@ async function checkStatus(){
  onSnapshot(ref, snap=>{
   if(!snap.exists()) return;
   riderData = snap.data();
-  document.getElementById('pName').value = riderData.name || '';
-  document.getElementById('pPhone').value = riderData.phone || '';
-  document.getElementById('pPlate').value = riderData.plate || '';
-  document.getElementById('pStatus').textContent = riderData.status || '';
-  document.getElementById('earningsText').textContent = `₱${riderData.earnings||0}`;
+  pName.value = riderData.name || '';
+  pPhone.value = riderData.phone || '';
+  pPlate.value = riderData.plate || '';
+  pStatus.textContent = riderData.status || '';
+  riderName.textContent = riderData.name || 'Rider';
+  earningsText.textContent = `₱${riderData.earnings||0}`;
+  
+  // BAGO: 3 STATES LOGIC
+  pendingScreen.style.display='none';
+  rejectedScreen.style.display='none';
+  approvedScreen.style.display='none';
+
   if(riderData.status==='approved'){
-   document.getElementById('subtabs').style.display='flex';
-   document.getElementById('pendingScreen').style.display='none';
-   document.getElementById('approvedScreen').style.display='block';
+   approvedScreen.style.display='block';
    if(!map) initMap();
-   const btn = document.getElementById('onlineBtn');
-   btn.disabled = false;
+   onlineBtn.disabled = false;
    if(riderData.online){
-    btn.classList.remove('off');btn.textContent='ONLINE';
-    document.getElementById('onlineStatus').textContent='You are visible to customers';
+    onlineBtn.classList.remove('off');onlineBtn.textContent='ONLINE';
+    onlineStatus.textContent='You are visible to customers';
    }else{
-    btn.classList.add('off');btn.textContent='OFFLINE';
-    document.getElementById('onlineStatus').textContent='You are hidden';
+    onlineBtn.classList.add('off');onlineBtn.textContent='OFFLINE';
+    onlineStatus.textContent='Tap to start accepting bookings';
    }
-  }else{
-   document.getElementById('subtabs').style.display='none';
-   document.getElementById('pendingScreen').style.display='block';
-   document.getElementById('approvedScreen').style.display='none';
+  }else if(riderData.status==='rejected'){
+   rejectedScreen.style.display='block';
+   rejectReason.textContent = riderData.rejectedReason || 'Invalid or incomplete documents'; // BAGO: Reason field
+  }else{ // pending
+   pendingScreen.style.display='block';
   }
  });
 }
@@ -199,15 +227,15 @@ function listenBookings(){
   const bookings = snap.docs.map(d=>({id:d.id,...d.data()}));
   const active = bookings.find(b=>b.status==='assigned' || b.status==='accepted' || b.status==='picking');
   const pending = bookings.filter(b=>b.status==='assigned');
-  document.getElementById('bookingBadge').style.display = pending.length>0?'inline-block':'none';
-  document.getElementById('bookingBadge').textContent = pending.length;
+  bookingBadge.style.display = pending.length>0?'inline-block':'none';
+  bookingBadge.textContent = pending.length;
   if(active){
    activeBookingId = active.id;
-   document.getElementById('activeBooking').innerHTML = `
+   activeBooking.innerHTML = `
     <div class="card" style="border:2px solid #38bdf8">
      <h3 class="active">🚨 ACTIVE BOOKING</h3>
-     <div class="row"><b>Customer:</b> ${active.customerName}</div>
-     <div class="row"><b>Phone:</b> <a href="tel:${active.customerPhone}" style="color:#38bdf8">${active.customerPhone}</a></div>
+     <div class="row"><b>Customer:</b> ${active.customerName||'Customer'}</div>
+     <div class="row"><b>Phone:</b> <a href="tel:${active.customerPhone}" style="color:#38bdf8">${active.customerPhone||'-'}</a></div>
      <div class="row"><b>Pet:</b> ${active.petName} - ${active.petBreed} (${active.petSize})</div>
      <div class="row"><b>Pick-up:</b> ${active.pickup}</div>
      <div class="row"><b>Drop-off:</b> ${active.dropoff}</div>
@@ -223,9 +251,9 @@ function listenBookings(){
     </div>
    `;
   }else{
-   document.getElementById('activeBooking').innerHTML = '<div class="card"><p>No active booking</p></div>';
+   activeBooking.innerHTML = '<div class="card"><p>No active booking</p></div>';
   }
-  document.getElementById('bookingsList').innerHTML = bookings.filter(b=>b.status==='completed').map(b=>`
+  bookingsList.innerHTML = bookings.filter(b=>b.status==='completed').map(b=>`
    <div class="card"><b>${b.petName}</b> - ${b.pickup} > ${b.dropoff}<br><small>₱${b.fee} | Completed</small></div>
   `).join('');
  });
@@ -247,23 +275,15 @@ async function completeTrip(id){
 window.completeTrip=completeTrip;
 
 async function saveProfile(){
- const name = document.getElementById('pName').value;
- const phone = document.getElementById('pPhone').value;
- const plate = document.getElementById('pPlate').value;
- await updateDoc(doc(db,'riders',uid),{name,phone,plate});
+ await updateDoc(doc(db,'riders',uid),{name:pName.value,phone:pPhone.value,plate:pPlate.value});
  alert('Profile Updated!');
 }
 window.saveProfile=saveProfile;
 
 async function signup(){
- const name=document.getElementById('name').value;
- const phone=document.getElementById('phone').value;
- const plate=document.getElementById('plate').value;
- const email=document.getElementById('suEmail').value;
- const pass=document.getElementById('suPass').value;
- const cred=await createUserWithEmailAndPassword(auth,email,pass);
+ const cred=await createUserWithEmailAndPassword(auth,suEmail.value,suPass.value);
  await setDoc(doc(db,'riders',cred.user.uid),{
-  name,phone,plate,email,status:'pending',online:false,earnings:0,lat:null,lng:null
+  name:name.value,phone:phone.value,plate:plate.value,email:suEmail.value,status:'pending',online:false,earnings:0,lat:null,lng:null,rejectedReason:'' // BAGO
  });
  alert('Signup success! Wait for admin approval.');
  showLogin();
@@ -271,30 +291,24 @@ async function signup(){
 window.signup=signup;
 
 async function login(){
- try{await signInWithEmailAndPassword(auth,document.getElementById('email').value,document.getElementById('pass').value);}
+ try{await signInWithEmailAndPassword(auth,email.value,pass.value);}
  catch(e){alert(e.message);}
 }
 window.login=login;
 window.logout=()=>signOut(auth);
-window.showSignup=()=>{document.getElementById('loginScreen').style.display='none';document.getElementById('signupScreen').style.display='flex';}
-window.showLogin=()=>{document.getElementById('signupScreen').style.display='none';document.getElementById('loginScreen').style.display='flex';}
+window.showSignup=()=>{loginScreen.style.display='none';signupScreen.style.display='flex';}
+window.showLogin=()=>{signupScreen.style.display='none';loginScreen.style.display='flex';}
 
 function switchTab(id,btn){
  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
  document.getElementById(id).classList.add('active');
  btn.classList.add('active');
- document.getElementById('headerTitle').textContent=btn.innerText.split('\n')[0];
+ headerTitle.textContent=btn.innerText.split('\n')[0];
 }
 window.switchTab=switchTab;
 
-function showSub(id){
- document.querySelectorAll('#homeSub.tab,#bookingsSub,#earningsSub,#profileSub').forEach(t=>t.classList.remove('active'));
- document.querySelectorAll('.subtab').forEach(b=>b.classList.remove('active'));
- document.getElementById(id).classList.add('active');
- event.target.classList.add('active');
-}
-window.showSub=showSub;
+// TINANGGAL: function showSub()
 
 function initMap(){
  map=L.map('map').setView([13.96,121.12],13);
@@ -309,8 +323,7 @@ function initMap(){
 }
 
 async function toggleOnline(){
- const btn = document.getElementById('onlineBtn');
- btn.disabled = true;
+ onlineBtn.disabled = true;
  try{
   const ref=doc(db,'riders',uid);
   const snap=await getDoc(ref);
@@ -318,7 +331,7 @@ async function toggleOnline(){
   await updateDoc(ref,{online:on});
  }catch(e){
   alert('Error: '+e.message);
-  btn.disabled = false;
+  onlineBtn.disabled = false;
  }
 }
 window.toggleOnline=toggleOnline;
