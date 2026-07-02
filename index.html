@@ -1,187 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>SafePaws</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SafePaws Rider V2.5</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-:root{--bg:#0b1020;--glass:rgba(22,33,62,.7);--accent:#38bdf8}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body,html{margin:0;padding:0;height:100%;width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI';background:var(--bg);color:#fff;overflow:hidden}
+*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',Arial;background:#0f172a;color:#e5e7eb;overflow:hidden}
 
-/* FIX: BINALIK YUNG SPLASH ANIMATION */
-#splash{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeOut.5s ease 1.5s forwards}
+/* BAGO: SPLASH ANIMATION */
+#splash{position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeOut.5s ease 1.5s forwards}
 #splash div{font-size:100px;animation:pop.8s cubic-bezier(.68,-.55,.265,1.55)}
 @keyframes pop{0%{transform:scale(.5);opacity:0}100%{transform:scale(1);opacity:1}}
 @keyframes fadeOut{0%{opacity:1}100%{opacity:0;visibility:hidden}}
 
-#loginScreen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;padding:20px;z-index:500}
-.login-box{width:100%;max-width:360px}.login-box h1{font-size:40px;text-align:center;margin:0 0 30px}
-.login-box input{width:100%;padding:18px;margin:8px 0;border-radius:16px;border:0;background:var(--glass);color:#fff;font-size:16px}
-.login-box button{width:100%;padding:18px;margin-top:12px;border:0;border-radius:16px;background:var(--accent);color:#0b1020;font-weight:800;font-size:17px}
-#app{position:fixed;inset:0;display:none}
-#map{position:absolute;inset:0;z-index:1}
-.fab{position:absolute;top:50px;right:20px;z-index:10;background:var(--glass);backdrop-filter:blur(20px);border:0;width:50px;height:50px;border-radius:50%;font-size:22px;color:#fff}
-.bottom-sheet{position:absolute;bottom:0;left:0;right:0;z-index:10;background:var(--glass);backdrop-filter:blur(30px);border-radius:30px 30px 0 0;padding:20px;max-height:60vh;overflow-y:auto}
-.handle{width:40px;height:5px;background:#475569;border-radius:10px;margin:0 auto 15px}
-.search-bar{display:flex;gap:10px;align-items:center;background:rgba(0,0,0,.3);padding:15px;border-radius:18px}
-.search-bar input{flex:1;background:0;border:0;color:#fff;font-size:16px;outline:0}
-.swap{background:var(--accent);border:0;width:40px;height:40px;border-radius:12px;font-size:20px;color:#0b1020}
-.btn{width:100%;padding:18px;margin-top:15px;border:0;border-radius:16px;background:var(--accent);color:#0b1020;font-weight:800;font-size:17px}
-.btn.danger{background:#dc2626;color:#fff}
-.card{background:rgba(0,0,0,.3);padding:15px;border-radius:18px;margin:10px 0}
-.rider-row{display:flex;align-items:center;gap:12px}.avatar{width:50px;height:50px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:24px}
-.status{width:100%;text-align:center;padding:12px;border-radius:14px;font-weight:800;margin:12px 0}
-.dots{display:flex;justify-content:space-between;padding:0 10px}.dot{width:12px;height:12px;border-radius:50%;background:#334155}.dot.on{background:var(--accent);box-shadow:0 0 8px var(--accent)}
-.bottom-nav{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:30px;background:var(--glass);backdrop-filter:blur(30px);padding:12px 30px;border-radius:999px}
-.bottom-nav button{background:0;border:0;color:#94a3b8;font-size:24px}
-.bottom-nav button.on{color:var(--accent)}
-.page{display:none;height:100%;padding:80px 20px 100px;overflow-y:auto}.page.on{display:block}
-select{width:100%;padding:15px;margin-top:10px;border-radius:18px;border:0;background:rgba(0,0,0,.3);color:#fff;font-size:16px}
-.toggle{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:14px}
-.toggle input{width:40px;height:24px}
-hr{border:0;border-top:1px solid #334155;margin:8px 0}
+#loginScreen{display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b)}
+.login-card{background:#1e293b;padding:28px;border-radius:16px;width:90%;max-width:380px;border:1px solid #334155}
+.login-card h1{text-align:center;margin:0 0 16px}
+.login-card input{width:100%;padding:14px;margin:8px 0;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e5e7eb}
+.login-card button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:10px;background:#38bdf8;color:#0f172a;font-weight:bold;cursor:pointer}
+.link{color:#38bdf8;text-align:center;margin-top:10px;cursor:pointer}
+#appScreen{display:none}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#1e293b;border-bottom:1px solid #334155;position:sticky;top:0}
+.logout{background:#dc2626;border:0;color:#fff;padding:8px 12px;border-radius:8px;font-weight:bold}
+.subtabs{display:flex;background:#1e293b;border-bottom:1px solid #334155;overflow-x:auto}
+.subtab{flex:1;padding:12px;text-align:center;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+.subtab.active{border-bottom:3px solid #38bdf8;color:#38bdf8;font-weight:bold}
+.screen{display:none;padding:16px;padding-bottom:80px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:12px}
+.card input{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#e5e7eb}
+#map{height:300px;border-radius:12px;margin-top:12px}
+.btn{width:100%;padding:16px;border:0;border-radius:12px;background:#16a34a;color:#fff;font-weight:bold;font-size:16px;cursor:pointer;margin-top:8px}
+.btn.off{background:#dc2626}
+.btn.reject{background:#dc2626}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.status-card{text-align:center;padding:40px 20px}
+.status-card h2{font-size:28px;margin:0}
+.pending{color:#f59e0b}.approved{color:#16a34a}.active{color:#38bdf8}
+nav{position:fixed;bottom:0;left:0;right:0;background:#1e293b;border-top:1px solid #334155;display:flex}
+nav button{flex:1;padding:12px;background:0;border:0;color:#94a3b8;font-size:12px;cursor:pointer}
+nav button.active{color:#38bdf8}
+.tab{display:none}.tab.active{display:block}
+small{color:#94a3b8}
+.badge{background:#f59e0b;color:#0f172a;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:bold;margin-left:4px}
+.row{display:flex;justify-content:space-between;align-items:center;margin:4px 0}
 </style>
 </head>
 <body>
 
-<div id="splash"><div>🐾</div></div>
+<!-- BAGO: SPLASH -->
+<div id="splash"><div>🏍️</div></div>
 
 <div id="loginScreen">
-  <div class="login-box">
-    <h1>🐾 SafePaws</h1>
+  <div class="login-card">
+    <h1>🏍️ SafePaws Rider</h1>
     <input id="email" type="email" placeholder="Email">
     <input id="pass" type="password" placeholder="Password">
     <button onclick="login()">Login</button>
+    <div class="link" onclick="showSignup()">No account? Sign up</div>
   </div>
 </div>
 
-<div id="app">
-  <div id="map"></div>
-  <button class="fab" onclick="logout()">⏻</button>
+<div id="signupScreen" style="display:none">
+  <div class="login-card">
+    <h1>📝 Rider Signup</h1>
+    <input id="name" placeholder="Full Name">
+    <input id="phone" placeholder="Phone">
+    <input id="plate" placeholder="Plate Number">
+    <input id="suEmail" type="email" placeholder="Email">
+    <input id="suPass" type="password" placeholder="Password">
+    <button onclick="signup()">Sign Up</button>
+    <div class="link" onclick="showLogin()">Back to Login</div>
+  </div>
+</div>
 
-  <div id="bookPage" class="page on">
-    <div class="bottom-sheet" id="sheet">
-      <div class="handle"></div>
-      <div id="bookView">
-        <div class="search-bar">
-          <span>🟢</span><input id="pickup" placeholder="Pick-up Location">
-          <button class="swap" onclick="swap()">⇅</button>
-        </div>
-        <div class="search-bar" style="margin-top:10px">
-          <span>🔴</span><input id="dropoff" placeholder="Drop-off Location">
-        </div>
-        <input id="petName" placeholder="Pet Name" style="width:100%;margin-top:10px;padding:15px;border-radius:18px;border:0;background:rgba(0,0,0,.3);color:#fff">
-        <select id="petSize">
-          <option value="small">Small Pet - 0kg to 10kg</option>
-          <option value="medium">Medium Pet - 11kg to 25kg +₱50</option>
-          <option value="large">Large Pet - 26kg+ +₱100</option>
-        </select>
-        <div class="toggle">
-          <input type="checkbox" id="emergency">
-          <label for="emergency">🚨 Emergency/Rescue Mode +₱100</label>
-        </div>
-        <button class="btn" id="bookBtn" onclick="book()">Book Pet Ride</button>
+<div id="appScreen">
+<header>
+  <h3 id="headerTitle">🏠 Home</h3>
+  <button class="logout" onclick="logout()">Logout</button>
+</header>
+<div id="subtabs" class="subtabs" style="display:none">
+  <div class="subtab active" onclick="showSub('homeSub')">Home</div>
+  <div class="subtab" onclick="showSub('bookingsSub')">Bookings <span id="bookingBadge" class="badge" style="display:none">0</span></div>
+  <div class="subtab" onclick="showSub('earningsSub')">Earnings</div>
+  <div class="subtab" onclick="showSub('profileSub')">Profile</div>
+</div>
+<main>
+  <div id="homeSub" class="screen tab active">
+    <div id="pendingScreen" class="card status-card" style="display:none">
+      <h2 class="pending">⏳ PENDING</h2>
+      <p>Your application is under review by Admin.</p>
+    </div>
+    <div id="approvedScreen" style="display:none">
+      <div class="card">
+        <h3 style="margin-top:0">Go Online</h3>
+        <button id="onlineBtn" class="btn off" onclick="toggleOnline()">OFFLINE</button>
+        <small id="onlineStatus">Checking...</small>
       </div>
-
-      <div id="trackView" style="display:none">
-        <div class="card rider-row">
-          <div class="avatar">🏍️</div>
-          <div><b id="rName">Finding Rider...</b><br><small id="rPlate"></small></div>
-          <div style="margin-left:auto;font-size:24px" onclick="alert('Calling Rider...')">📞</div>
-        </div>
-        <div class="card" id="fareCard">
-          <div style="display:flex;justify-content:space-between"><span>Distance</span><b id="km">0.0 km</b></div>
-          <div style="display:flex;justify-content:space-between;font-size:14px;color:#94a3b8"><span>Base Fare</span><span>₱80</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:14px;color:#94a3b8"><span id="kmLabel">0.0 km x ₱15</span><span id="kmFee">₱0</span></div>
-          <div id="sizeFeeRow" style="display:none;justify-content:space-between;font-size:14px;color:#94a3b8"><span>Pet Size Fee</span><span id="sizeFee">₱0</span></div>
-          <div id="nightFeeRow" style="display:none;justify-content:space-between;font-size:14px;color:#94a3b8"><span>Night Fee</span><span>₱30</span></div>
-          <div id="emergFeeRow" style="display:none;justify-content:space-between;font-size:14px;color:#94a3b8"><span>Emergency Fee</span><span>₱100</span></div>
-          <hr>
-          <div style="display:flex;justify-content:space-between;font-weight:800;font-size:18px"><span>Total Fare</span><b id="fare">₱0</b></div>
-          <div id="status" class="status">Waiting...</div>
-          <div class="dots"><div id="d1" class="dot on"></div><div id="d2" class="dot"></div><div id="d3" class="dot"></div><div id="d4" class="dot"></div></div>
-        </div>
-        <button class="btn danger" onclick="cancel()">Cancel Ride</button>
-      </div>
+      <div id="map"></div>
     </div>
   </div>
-
-  <div id="historyPage" class="page"><h2>📜 Ride History</h2><div id="historyList"></div></div>
-  <div id="profilePage" class="page"><h2>👤 Profile</h2><input id="pName" placeholder="Full Name" style="width:100%;padding:15px;margin:10px 0;border-radius:18px;border:0;background:var(--glass);color:#fff"><input id="pPhone" placeholder="Phone Number" style="width:100%;padding:15px;margin:10px 0;border-radius:18px;border:0;background:var(--glass);color:#fff"><button class="btn" onclick="save()">Save Profile</button></div>
-
-  <div class="bottom-nav">
-    <button id="navBook" class="on" onclick="go('bookPage',this)">🏠</button>
-    <button id="navHist" onclick="go('historyPage',this)">📜</button>
-    <button id="navProf" onclick="go('profilePage',this)">👤</button>
+  <div id="bookingsSub" class="screen tab">
+    <div id="activeBooking"></div>
+    <div id="bookingsList"></div>
   </div>
+  <div id="earningsSub" class="screen tab">
+    <div class="card"><h3>💰 Earnings</h3><p id="earningsText">₱0.00</p></div>
+  </div>
+  <div id="profileSub" class="screen tab">
+    <div class="card">
+      <h3>👤 My Profile</h3>
+      <input id="pName" placeholder="Full Name">
+      <input id="pPhone" placeholder="Phone">
+      <input id="pPlate" placeholder="Plate Number">
+      <small>Status: <span id="pStatus"></span></small>
+      <button class="login-card button" style="margin-top:12px" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </div>
+</main>
+<nav>
+  <button class="active" onclick="switchTab('homeSub',this)">🏠<br>Home</button>
+  <button onclick="switchTab('bookingsSub',this)">📦<br>Bookings</button>
+  <button onclick="switchTab('earningsSub',this)">💰<br>Earnings</button>
+  <button onclick="switchTab('profileSub',this)">👤<br>Profile</button>
+</nav>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, onSnapshot, updateDoc, getDoc, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os",
+ apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os",
   authDomain: "safepaws-batangas.firebaseapp.com",
   projectId: "safepaws-batangas",
   storageBucket: "safepaws-batangas.firebasestorage.app",
   messagingSenderId: "629904615191",
   appId: "1:629904615191:web:45f7148d65ba61a867f952"
-  };
-const app=initializeApp(firebaseConfig);const auth=getAuth(app);const db=getFirestore(app);
-let uid,bid,map,riderM,routeLine;
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+let map, marker, uid, riderData, activeBookingId;
 
-onAuthStateChanged(auth,u=>{if(u){uid=u.uid;document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='block';initMap();loadP();loadH();check();}else{document.getElementById('loginScreen').style.display='flex';}});
-async function login(){try{await signInWithEmailAndPassword(auth,email.value,pass.value);}catch(e){alert(e.message);}}
-window.login=login;window.logout=()=>signOut(auth);
+onAuthStateChanged(auth, async user=>{
+ if(user){
+  uid=user.uid;
+  // BAGO: Tanggalin splash after 1.6s
+  setTimeout(()=>{document.getElementById('splash').style.display='none';},1600);
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('signupScreen').style.display='none';
+  document.getElementById('appScreen').style.display='block';
+  checkStatus();
+  listenBookings();
+ }else{
+  document.getElementById('splash').style.display='flex'; // BAGO: Pakita ulit splash pag logout
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('appScreen').style.display='none';
+ }
+});
 
-function initMap(){map=L.map('map',{zoomControl:false}).setView([13.81,121.02],13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:''}).addTo(map);riderM=L.marker([13.81,121.02]).addTo(map);}
-
-function swap(){const p=pickup.value;pickup.value=dropoff.value;dropoff.value=p;}
-window.swap=swap;
-
-function calcFare(km,petSize,isEmerg){
-  const base=80;const kmFee=Math.round(km*15);
-  const sizeFee=petSize==='medium'?50:petSize==='large'?100:0;
-  const h=new Date().getHours();const nightFee=(h>=22||h<5)?30:0;
-  const emergFee=isEmerg?100:0;const total=Math.max(250,base+kmFee+sizeFee+nightFee+emergFee);
-  return{km,kmFee,sizeFee,nightFee,emergFee,total};
+async function checkStatus(){
+ const ref = doc(db,'riders',uid);
+ onSnapshot(ref, snap=>{
+  if(!snap.exists()) return;
+  riderData = snap.data();
+  document.getElementById('pName').value = riderData.name || '';
+  document.getElementById('pPhone').value = riderData.phone || '';
+  document.getElementById('pPlate').value = riderData.plate || '';
+  document.getElementById('pStatus').textContent = riderData.status || '';
+  document.getElementById('earningsText').textContent = `₱${riderData.earnings||0}`;
+  if(riderData.status==='approved'){
+   document.getElementById('subtabs').style.display='flex';
+   document.getElementById('pendingScreen').style.display='none';
+   document.getElementById('approvedScreen').style.display='block';
+   if(!map) initMap();
+   const btn = document.getElementById('onlineBtn');
+   btn.disabled = false;
+   if(riderData.online){
+    btn.classList.remove('off');btn.textContent='ONLINE';
+    document.getElementById('onlineStatus').textContent='You are visible to customers';
+   }else{
+    btn.classList.add('off');btn.textContent='OFFLINE';
+    document.getElementById('onlineStatus').textContent='You are hidden';
+   }
+  }else{
+   document.getElementById('subtabs').style.display='none';
+   document.getElementById('pendingScreen').style.display='block';
+   document.getElementById('approvedScreen').style.display='none';
+  }
+ });
 }
 
-async function book(){
-  bookBtn.disabled=true;bookBtn.textContent='Booking...';
-  const p1=await geo(pickup.value);const p2=await geo(dropoff.value);
-  if(!p1||!p2){alert('Invalid location');bookBtn.disabled=false;bookBtn.textContent='Book Pet Ride';return;}
-  const km=hav(p1.lat,p1.lng,p2.lat,p2.lng);const petSize=petSize.value;const isEmerg=emergency.checked;const f=calcFare(km,petSize,isEmerg);
-  km.textContent=f.km.toFixed(1)+' km';kmLabel.textContent=f.km.toFixed(1)+' km x ₱15';kmFee.textContent='₱'+f.kmFee;
-  if(f.sizeFee>0){sizeFeeRow.style.display='flex';sizeFee.textContent='₱'+f.sizeFee;}
-  if(f.nightFee>0){nightFeeRow.style.display='flex';}
-  if(f.emergFee>0){emergFeeRow.style.display='flex';}
-  fare.textContent='₱'+f.total;
-  const ref=await addDoc(collection(db,'bookings'),{customerId:uid,petName:petName.value,petSize,isEmerg,pickup:pickup.value,pickupLat:p1.lat,pickupLng:p1.lng,dropoff:dropoff.value,dropoffLat:p2.lat,dropoffLng:p2.lng,...f,status:'pending',riderId:null,createdAt:serverTimestamp()});
-  bid=ref.id;showTrack();bookBtn.disabled=false;bookBtn.textContent='Book Pet Ride';
+function listenBookings(){
+ const q = query(collection(db,'bookings'), where('assignedRider','==',uid));
+ onSnapshot(q, snap=>{
+  const bookings = snap.docs.map(d=>({id:d.id,...d.data()}));
+  const active = bookings.find(b=>b.status==='assigned' || b.status==='accepted' || b.status==='picking');
+  const pending = bookings.filter(b=>b.status==='assigned');
+  document.getElementById('bookingBadge').style.display = pending.length>0?'inline-block':'none';
+  document.getElementById('bookingBadge').textContent = pending.length;
+  if(active){
+   activeBookingId = active.id;
+   document.getElementById('activeBooking').innerHTML = `
+    <div class="card" style="border:2px solid #38bdf8">
+     <h3 class="active">🚨 ACTIVE BOOKING</h3>
+     <div class="row"><b>Customer:</b> ${active.customerName}</div>
+     <div class="row"><b>Phone:</b> <a href="tel:${active.customerPhone}" style="color:#38bdf8">${active.customerPhone}</a></div>
+     <div class="row"><b>Pet:</b> ${active.petName} - ${active.petBreed} (${active.petSize})</div>
+     <div class="row"><b>Pick-up:</b> ${active.pickup}</div>
+     <div class="row"><b>Drop-off:</b> ${active.dropoff}</div>
+     <div class="row"><b>Fee:</b> ₱${active.fee}</div>
+     ${active.status==='assigned'? `
+      <button class="btn" onclick="acceptBooking('${active.id}')">Accept</button>
+      <button class="btn reject" onclick="rejectBooking('${active.id}')">Reject</button>
+     ` : active.status==='accepted'? `
+      <button class="btn" onclick="startTrip('${active.id}')">Start Trip</button>
+     ` : active.status==='picking'? `
+      <button class="btn" onclick="completeTrip('${active.id}')">Complete Trip</button>
+     ` : ''}
+    </div>
+   `;
+  }else{
+   document.getElementById('activeBooking').innerHTML = '<div class="card"><p>No active booking</p></div>';
+  }
+  document.getElementById('bookingsList').innerHTML = bookings.filter(b=>b.status==='completed').map(b=>`
+   <div class="card"><b>${b.petName}</b> - ${b.pickup} > ${b.dropoff}<br><small>₱${b.fee} | Completed</small></div>
+  `).join('');
+ });
 }
-window.book=book;
 
-function showTrack(){bookView.style.display='none';trackView.style.display='block';}
-function check(){onSnapshot(collection(db,'bookings'),s=>{const b=s.docs.find(d=>d.data().customerId===uid&&d.data().status!=='completed');if(b){bid=b.id;loadFare(b.data());listen(b.id);showTrack();}});}
-function loadFare(b){km.textContent=b.km+' km';kmLabel.textContent=b.km+' km x ₱15';kmFee.textContent='₱'+b.kmFee;if(b.sizeFee>0){sizeFeeRow.style.display='flex';sizeFee.textContent='₱'+b.sizeFee;}if(b.nightFee>0){nightFeeRow.style.display='flex';}if(b.emergFee>0){emergFeeRow.style.display='flex';}fare.textContent='₱'+b.total;}
-function listen(id){onSnapshot(doc(db,'bookings',id),s=>{const b=s.data();if(!b)return;if(b.riderId){onSnapshot(doc(db,'riders',b.riderId),r=>{const d=r.data();if(d){rName.textContent=d.name;rPlate.textContent=d.plate;if(d.lat){riderM.setLatLng([d.lat,d.lng]);map.setView([d.lat,d.lng],15);if(routeLine)map.removeLayer(routeLine);routeLine=L.polyline([[d.lat,d.lng],[b.pickupLat,b.pickupLng],[b.dropoffLat,b.dropoffLng]],{color:'#38bdf8',weight:4}).addTo(map);}}});}const st=b.status;status.textContent=st;document.querySelectorAll('.dot').forEach(x=>x.classList.remove('on'));if(st==='pending'){status.textContent='Waiting for Rider';status.style.background='#f59e0b';d1.classList.add('on');}if(st==='assigned'){status.textContent='Rider On The Way';status.style.background='#38bdf8';d1.classList.add('on');}if(st==='pickedup'){status.textContent='Pet Picked Up';d1.classList.add('on');d2.classList.add('on');}if(st==='otw'){status.textContent='On The Way';d1.classList.add('on');d2.classList.add('on');d3.classList.add('on');}if(st==='completed'){status.textContent='Dropped Off ✓';status.style.background='#16a34a';document.querySelectorAll('.dot').forEach(x=>x.classList.add('on'));}});}
-async function cancel(){if(!bid)return;if(confirm('Cancel this ride?')){await deleteDoc(doc(db,'bookings',bid));trackView.style.display='none';bookView.style.display='block';sizeFeeRow.style.display='none';nightFeeRow.style.display='none';emergFeeRow.style.display='none';bid=null;}}
-window.cancel=cancel;
+async function acceptBooking(id){ await updateDoc(doc(db,'bookings',id),{status:'accepted'}); }
+window.acceptBooking=acceptBooking;
+async function rejectBooking(id){ await updateDoc(doc(db,'bookings',id),{status:'rejected',assignedRider:null}); }
+window.rejectBooking=rejectBooking;
+async function startTrip(id){ await updateDoc(doc(db,'bookings',id),{status:'picking'}); }
+window.startTrip=startTrip;
+async function completeTrip(id){
+ const snap = await getDoc(doc(db,'bookings',id));
+ const fee = snap.data().fee || 0;
+ await updateDoc(doc(db,'bookings',id),{status:'completed'});
+ await updateDoc(doc(db,'riders',uid),{earnings:(riderData.earnings||0)+fee});
+ alert(`Trip completed! +₱${fee}`);
+}
+window.completeTrip=completeTrip;
 
-function loadP(){getDoc(doc(db,'customers',uid)).then(s=>{if(s.exists()){pName.value=s.data().name||'';pPhone.value=s.data().phone||'';}});}
-async function save(){await updateDoc(doc(db,'customers',uid),{name:pName.value,phone:pPhone.value},{merge:true});alert('Saved');}
-window.save=save;
+async function saveProfile(){
+ const name = document.getElementById('pName').value;
+ const phone = document.getElementById('pPhone').value;
+ const plate = document.getElementById('pPlate').value;
+ await updateDoc(doc(db,'riders',uid),{name,phone,plate});
+ alert('Profile Updated!');
+}
+window.saveProfile=saveProfile;
 
-function loadH(){onSnapshot(collection(db,'bookings'),s=>{const m=s.docs.filter(d=>d.data().customerId===uid).sort((a,b)=>b.data().createdAt?.seconds-a.data().createdAt?.seconds);historyList.innerHTML=m.map(d=>`<div class="card"><b>${d.data().petName}</b> - ₱${d.data().total}<br><small>${d.data().pickup} > ${d.data().dropoff}<br>Status: ${d.data().status}</small></div>`).join('')||'<small>No rides yet</small>';});}
-function go(id,btn){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('on'));document.getElementById(id).classList.add('on');btn.classList.add('on');}
-window.go=go;
+async function signup(){
+ const name=document.getElementById('name').value;
+ const phone=document.getElementById('phone').value;
+ const plate=document.getElementById('plate').value;
+ const email=document.getElementById('suEmail').value;
+ const pass=document.getElementById('suPass').value;
+ const cred=await createUserWithEmailAndPassword(auth,email,pass);
+ await setDoc(doc(db,'riders',cred.user.uid),{
+  name,phone,plate,email,status:'pending',online:false,earnings:0,lat:null,lng:null
+ });
+ alert('Signup success! Wait for admin approval.');
+ showLogin();
+}
+window.signup=signup;
 
-function hav(a,b,c,d){const R=6371;const e=(c-a)*Math.PI/180;const f=(d-b)*Math.PI/180;const g=Math.sin(e/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(f/2)**2;return R*2*Math.atan2(Math.sqrt(g),Math.sqrt(1-g));}
-async function geo(q){try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`);const d=await r.json();if(d.length)return{lat:+d[0].lat,lng:+d[0].lon};}catch{}return null;}
+async function login(){
+ try{await signInWithEmailAndPassword(auth,document.getElementById('email').value,document.getElementById('pass').value);}
+ catch(e){alert(e.message);}
+}
+window.login=login;
+window.logout=()=>signOut(auth);
+window.showSignup=()=>{document.getElementById('loginScreen').style.display='none';document.getElementById('signupScreen').style.display='flex';}
+window.showLogin=()=>{document.getElementById('signupScreen').style.display='none';document.getElementById('loginScreen').style.display='flex';}
+
+function switchTab(id,btn){
+ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+ document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ btn.classList.add('active');
+ document.getElementById('headerTitle').textContent=btn.innerText.split('\n')[0];
+}
+window.switchTab=switchTab;
+
+function showSub(id){
+ document.querySelectorAll('#homeSub.tab,#bookingsSub,#earningsSub,#profileSub').forEach(t=>t.classList.remove('active'));
+ document.querySelectorAll('.subtab').forEach(b=>b.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ event.target.classList.add('active');
+}
+window.showSub=showSub;
+
+function initMap(){
+ map=L.map('map').setView([13.96,121.12],13);
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+ marker=L.marker([13.96,121.12]).addTo(map);
+ navigator.geolocation.watchPosition(p=>{
+  const {latitude:lat,longitude:lng}=p.coords;
+  marker.setLatLng([lat,lng]);
+  map.setView([lat,lng]);
+  if(uid && riderData?.online) updateDoc(doc(db,'riders',uid),{lat,lng});
+ });
+}
+
+async function toggleOnline(){
+ const btn = document.getElementById('onlineBtn');
+ btn.disabled = true;
+ try{
+  const ref=doc(db,'riders',uid);
+  const snap=await getDoc(ref);
+  const on=!snap.data().online;
+  await updateDoc(ref,{online:on});
+ }catch(e){
+  alert('Error: '+e.message);
+  btn.disabled = false;
+ }
+}
+window.toggleOnline=toggleOnline;
 </script>
 </body>
 </html>
