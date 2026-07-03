@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>SafePaws Rider V2.9.1</title>
+<title>SafePaws Rider V2.9.2</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',Arial;background:#0f172a;color:#e5e7eb}
-/* FIX 1: CAR ANIMATION LANG MAGFADE */
+/* FIX 1: CAR ANIMATION PA-KALIWA NA */
 #splash{position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:9999}
 #splash div{font-size:100px;animation:drive 1.2s cubic-bezier(.68,-.55,.265,1.55) forwards, fadeCar.5s ease 1.2s forwards}
-@keyframes drive{0%{transform:translateX(200px) scale(.8);opacity:0} 100%{transform:translateX(0) scale(1);opacity:1}}
+@keyframes drive{0%{transform:translateX(200px) scale(.8);opacity:0} 100%{transform:translateX(0) scale(1);opacity:1}} /* +200px na = from right to left */
 @keyframes fadeCar{0%{opacity:1} 100%{opacity:0}}
 /* FIX 2: SCROLLABLE */
 #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b)}
@@ -53,7 +53,7 @@ small{color:#94a3b8}
 <input id="email" type="email" placeholder="Email">
 <input id="pass" type="password" placeholder="Password">
 <button onclick="login()">Login</button>
-<div class="link" onclick="showSignup()">No account? Sign up</div>
+<div class="link" onclick="showSignup()">No account? Sign up</div> <!-- FIX: NABALIK NA -->
 </div>
 </div>
 
@@ -156,13 +156,15 @@ const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db =
 let map, marker, routeLine, uid, riderData, activeBookingId, riderLat, riderLng;
 
 onAuthStateChanged(auth, async user=>{
+// FIX: Tanggal splash after 1.7s kahit anong mangyari
+setTimeout(()=>{document.getElementById('splash').style.display='none';},1700); 
+
 if(user){
 uid=user.uid;
-setTimeout(()=>{document.getElementById('splash').style.display='none';},1700); // Wait car fade
 document.getElementById('loginScreen').style.display='none'; document.getElementById('signupScreen').style.display='none'; document.getElementById('appScreen').style.display='block';
 checkStatus(); listenBookings();
 }else{
-document.getElementById('splash').style.display='flex'; document.getElementById('loginScreen').style.display='flex'; document.getElementById('appScreen').style.display='none';
+document.getElementById('loginScreen').style.display='flex'; document.getElementById('appScreen').style.display='none';
 }
 });
 
