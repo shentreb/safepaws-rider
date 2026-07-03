@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>SafePaws Rider V2.9</title>
+<title>SafePaws Rider V2.9.1</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',Arial;background:#0f172a;color:#e5e7eb}
@@ -19,13 +19,13 @@
 .login-card button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:10px;background:#38bdf8;color:#0f172a;font-weight:bold;cursor:pointer}
 .link{color:#38bdf8;text-align:center;margin-top:10px;cursor:pointer}
 #appScreen{display:none;max-height:100vh;overflow-y:auto;padding-bottom:80px}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#1e293b;border-bottom:1px solid #334155;position:sticky;top:0;z-index:5}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#1e293b;border-bottom:1px solid #334155;position:sticky;top:0}
 .logout{background:#dc2626;border:0;color:#fff;padding:8px 12px;border-radius:8px;font-weight:bold}
 .screen{display:none;padding:16px}
 .card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:12px;text-align:left}
 .card.center{text-align:center;padding:40px 20px}
 .card input{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#e5e7eb}
-#map{height:250px;border-radius:12px;margin-top:12px;display:none} /* HIDE MUNA */
+#map{height:250px;border-radius:12px;margin-top:12px;display:none} /* FIX 2: HIDE MUNA */
 .btn{width:100%;padding:16px;border:0;border-radius:12px;background:#16a34a;color:#fff;font-weight:bold;font-size:16px;cursor:pointer;margin-top:8px}
 .btn.off{background:#dc2626}.btn.reject{background:#dc2626}.btn.nav{background:#38bdf8;color:#0f172a}.btn:disabled{opacity:0.5}
 .status-card h2{font-size:32px;margin:0 0 10px}
@@ -80,15 +80,6 @@ small{color:#94a3b8}
 <div id="pendingScreen" class="card center" style="display:none">
 <h2 class="pending">⏳ Application Submitted</h2>
 <p class="muted">Status: <b>Pending Review</b></p>
-<div class="card" style="text-align:left;margin-top:20px">
-<b>What happens next?</b>
-<div class="muted" style="margin-top:8px">
-1. Admin will review in <b>24-48 hours</b><br>
-2. You'll get notified here once approved<br>
-3. You can go online after approval
-</div>
-</div>
-<small>Need help? safepaws.support@gmail.com</small>
 </div>
 <div id="rejectedScreen" class="card center" style="display:none">
 <h2 class="rejected">❌ Application Rejected</h2>
@@ -96,7 +87,6 @@ small{color:#94a3b8}
 <div class="card" style="text-align:left;margin-top:20px;background:#2c1a1a;border-color:#dc2626">
 <b>Reason:</b> <span id="rejectReason" class="muted">Invalid documents</span>
 </div>
-<button class="btn" onclick="alert('Contact admin to resubmit')">Contact Admin</button>
 </div>
 <div id="approvedScreen" style="display:none">
 <div class="card center">
@@ -113,7 +103,7 @@ small{color:#94a3b8}
 <button id="onlineBtn" class="btn off" onclick="toggleOnline()">OFFLINE</button>
 <small id="onlineStatus">Tap to start accepting bookings</small>
 </div>
-<div id="map"></div> <!-- SHOW LANG PAG ONLINE -->
+<div id="map"></div> <!-- FIX 2: SHOW LANG PAG ONLINE -->
 </div>
 </div>
 
@@ -152,6 +142,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+// === PAKILITAN LANG TO NG FIREBASE CONFIG MO ===
 const firebaseConfig = {
   apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os",
   authDomain: "safepaws-batangas.firebaseapp.com",
@@ -167,51 +158,49 @@ let map, marker, routeLine, uid, riderData, activeBookingId, riderLat, riderLng;
 onAuthStateChanged(auth, async user=>{
 if(user){
 uid=user.uid;
-setTimeout(()=>{splash.style.display='none';},1700); // Wait car fade
-loginScreen.style.display='none'; signupScreen.style.display='none'; appScreen.style.display='block';
+setTimeout(()=>{document.getElementById('splash').style.display='none';},1700); // Wait car fade
+document.getElementById('loginScreen').style.display='none'; document.getElementById('signupScreen').style.display='none'; document.getElementById('appScreen').style.display='block';
 checkStatus(); listenBookings();
 }else{
-splash.style.display='flex'; loginScreen.style.display='flex'; appScreen.style.display='none';
+document.getElementById('splash').style.display='flex'; document.getElementById('loginScreen').style.display='flex'; document.getElementById('appScreen').style.display='none';
 }
 });
 
 async function checkStatus(){
 const ref = doc(db,'riders',uid);
-const hasSeenStatus = localStorage.getItem('seenStatus_'+uid); // 1 TIME LANG FOR GOOD
+const hasSeenStatus = localStorage.getItem('seenStatus_'+uid); // FIX 5: 1 TIME LANG
 
 onSnapshot(ref, snap=>{
 if(!snap.exists()) return;
 riderData = snap.data();
-pName.value = riderData.name || ''; pPhone.value = riderData.phone || ''; pPlate.value = riderData.plate || '';
-pStatus.textContent = riderData.status || ''; riderName.textContent = riderData.name || 'Rider';
-earningsText.textContent = `₱${riderData.earnings||0}`;
-earnTotal.textContent = `₱${riderData.earnings||0}`;
-earnToday.textContent = `₱${riderData.earningsToday||0}`;
+document.getElementById('pName').value = riderData.name || ''; document.getElementById('pPhone').value = riderData.phone || ''; document.getElementById('pPlate').value = riderData.plate || '';
+document.getElementById('pStatus').textContent = riderData.status || ''; document.getElementById('riderName').textContent = riderData.name || 'Rider';
+document.getElementById('earningsText').textContent = `₱${riderData.earnings||0}`;
+document.getElementById('earnTotal').textContent = `₱${riderData.earnings||0}`;
+document.getElementById('earnToday').textContent = `₱${riderData.earningsToday||0}`; 
 
-// 1 TIME LANG TO LALABAS
+// FIX 5: 1 TIME LANG FOR GOOD
 if(!hasSeenStatus){
-  pendingScreen.style.display='none'; rejectedScreen.style.display='none'; approvedScreen.style.display='none';
+  document.getElementById('pendingScreen').style.display='none'; document.getElementById('rejectedScreen').style.display='none'; document.getElementById('approvedScreen').style.display='none';
   if(riderData.status==='approved'){
-    approvedScreen.style.display='block'; 
-    if(riderData.online){ map.style.display='block'; if(!map._leaflet_id) initMap(); }
+    document.getElementById('approvedScreen').style.display='block'; 
+    if(riderData.online){ document.getElementById('map').style.display='block'; if(!map?._leaflet_id) initMap(); }
   }else if(riderData.status==='rejected'){
-    rejectedScreen.style.display='block'; rejectReason.textContent = riderData.rejectedReason || 'Invalid documents';
-  }else{ pendingScreen.style.display='block'; }
-  localStorage.setItem('seenStatus_'+uid, 'true');
+    document.getElementById('rejectedScreen').style.display='block'; document.getElementById('rejectReason').textContent = riderData.rejectedReason || 'Invalid documents';
+  }else{ document.getElementById('pendingScreen').style.display='block'; }
+  localStorage.setItem('seenStatus_'+uid, 'true'); 
 }else{
-  // Pag nakita na, Home lang lagi
-  pendingScreen.style.display='none'; rejectedScreen.style.display='none'; 
-  if(riderData.status==='approved'){ approvedScreen.style.display='block'; if(riderData.online){ map.style.display='block'; if(!map._leaflet_id) initMap(); } }
+  if(riderData.status==='approved'){ document.getElementById('approvedScreen').style.display='block'; if(riderData.online){ document.getElementById('map').style.display='block'; if(!map?._leaflet_id) initMap(); } }
 }
 
 // Live pa rin yung Online button
 if(riderData.status==='approved'){
   if(riderData.online){
-    onlineBtn.classList.remove('off');onlineBtn.textContent='ONLINE'; onlineStatus.textContent='You are visible';
+    document.getElementById('onlineBtn').classList.remove('off');document.getElementById('onlineBtn').textContent='ONLINE'; document.getElementById('onlineStatus').textContent='You are visible';
   }else{
-    onlineBtn.classList.add('off');onlineBtn.textContent='OFFLINE'; onlineStatus.textContent='Tap to start';
+    document.getElementById('onlineBtn').classList.add('off');document.getElementById('onlineBtn').textContent='OFFLINE'; document.getElementById('onlineStatus').textContent='Tap to start';
   }
-  onlineBtn.disabled = false;
+  document.getElementById('onlineBtn').disabled = false;
 }
 });
 }
@@ -222,10 +211,10 @@ onSnapshot(q, snap=>{
 const bookings = snap.docs.map(d=>({id:d.id,...d.data()}));
 const active = bookings.find(b=>b.status==='assigned' || b.status==='accepted' || b.status==='picking');
 const pending = bookings.filter(b=>b.status==='assigned');
-bookingBadge.style.display = pending.length>0?'inline-block':'none'; bookingBadge.textContent = pending.length;
+document.getElementById('bookingBadge').style.display = pending.length>0?'inline-block':'none'; document.getElementById('bookingBadge').textContent = pending.length;
 if(active){
 activeBookingId = active.id;
-activeBooking.innerHTML = `
+document.getElementById('activeBooking').innerHTML = `
 <div class="card" style="border:2px solid #38bdf8">
 <h3 class="active">🚨 ACTIVE BOOKING</h3>
 <div class="row"><b>Customer:</b> ${active.customerName||'Customer'}</div>
@@ -247,8 +236,8 @@ ${active.status==='assigned'? `
 </div>
 `;
 drawRoute(active);
-}else{ activeBooking.innerHTML = '<div class="card"><p>No active booking</p></div>'; if(routeLine) map.removeLayer(routeLine); }
-bookingsList.innerHTML = bookings.filter(b=>b.status==='completed').map(b=>`
+}else{ document.getElementById('activeBooking').innerHTML = '<div class="card"><p>No active booking</p></div>'; if(routeLine) map.removeLayer(routeLine); }
+document.getElementById('bookingsList').innerHTML = bookings.filter(b=>b.status==='completed').map(b=>`
 <div class="card"><b>${b.petName}</b> - ${b.pickup} > ${b.dropoff}<br><small>₱${b.fee} | Completed</small></div>
 `).join('');
 });
@@ -270,38 +259,38 @@ earningsToday:(Number(riderData.earningsToday)||0)+fee
 alert(`Trip completed! +₱${fee}`);
 }
 window.completeTrip=completeTrip;
-async function saveProfile(){ await updateDoc(doc(db,'riders',uid),{name:pName.value,phone:pPhone.value,plate:pPlate.value}); alert('Profile Updated!'); }
+async function saveProfile(){ await updateDoc(doc(db,'riders',uid),{name:document.getElementById('pName').value,phone:document.getElementById('pPhone').value,plate:document.getElementById('pPlate').value}); alert('Profile Updated!'); }
 window.saveProfile=saveProfile;
 async function signup(){
-const cred=await createUserWithEmailAndPassword(auth,suEmail.value,suPass.value);
+const cred=await createUserWithEmailAndPassword(auth,document.getElementById('suEmail').value,document.getElementById('suPass').value);
 await setDoc(doc(db,'riders',cred.user.uid),{
-name:name.value,phone:phone.value,plate:plate.value,email:suEmail.value,status:'pending',online:false,earnings:0,earningsToday:0,lat:null,lng:null,rejectedReason:''
+name:document.getElementById('name').value,phone:document.getElementById('phone').value,plate:document.getElementById('plate').value,email:document.getElementById('suEmail').value,status:'pending',online:false,earnings:0,earningsToday:0,lat:null,lng:null,rejectedReason:''
 });
 alert('Signup success! Wait for admin approval.'); showLogin();
 }
 window.signup=signup;
-async function login(){ try{await signInWithEmailAndPassword(auth,email.value,pass.value);} catch(e){alert(e.message);} }
+async function login(){ try{await signInWithEmailAndPassword(auth,document.getElementById('email').value,document.getElementById('pass').value);} catch(e){alert(e.message);} }
 window.login=login;
 window.logout=()=>signOut(auth);
-window.showSignup=()=>{loginScreen.style.display='none';signupScreen.style.display='flex';}
-window.showLogin=()=>{signupScreen.style.display='none';loginScreen.style.display='flex';}
-function switchTab(id,btn){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active')); document.getElementById(id).classList.add('active'); headerTitle.textContent=btn.innerText.split('\n')[0]; }
+window.showSignup=()=>{document.getElementById('loginScreen').style.display='none';document.getElementById('signupScreen').style.display='flex';}
+window.showLogin=()=>{document.getElementById('signupScreen').style.display='none';document.getElementById('loginScreen').style.display='flex';}
+function switchTab(id,btn){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active')); document.getElementById(id).classList.add('active'); document.getElementById('headerTitle').textContent=btn.innerText.split('\n')[0]; }
 window.switchTab=switchTab;
 
 function initMap(){
 map=L.map('map').setView([13.96,121.12],13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 marker=L.marker([13.96,121.12]).addTo(map);
 navigator.geolocation.watchPosition(p=>{
 riderLat=p.coords.latitude; riderLng=p.coords.longitude;
 marker.setLatLng([riderLat,riderLng]); map.setView([riderLat,riderLng]);
 if(uid && riderData?.online) updateDoc(doc(db,'riders',uid),{lat:riderLat,lng:riderLng});
-},{enableHighAccuracy:true});
-}
+})}
 
+// FIX 4: LEAFLET NAV LANG
 function showRoute(lat1,lng1,lat2,lng2){
 if(!map) return;
-map.style.display='block';
+document.getElementById('map').style.display='block';
 const pts = [[riderLat||13.96,riderLng||121.12],[lat1,lng1]];
 if(lat2) pts.push([lat2,lng2]);
 if(routeLine) map.removeLayer(routeLine);
@@ -316,14 +305,14 @@ showRoute(b.pickupLat,b.pickupLng,b.dropoffLat,b.dropoffLng);
 }
 
 async function toggleOnline(){
-onlineBtn.disabled = true;
+document.getElementById('onlineBtn').disabled = true;
 try{
 const ref=doc(db,'riders',uid);
 const snap=await getDoc(ref);
 const on=!snap.data().online;
 await updateDoc(ref,{online:on});
-if(!on) await updateDoc(ref,{earningsToday:0}); // Reset pag offline
-}catch(e){ alert('Error: '+e.message); }finally{onlineBtn.disabled = false;}
+if(!on) await updateDoc(ref,{earningsToday:0}); 
+}catch(e){ alert('Error: '+e.message); document.getElementById('onlineBtn').disabled = false; }
 }
 window.toggleOnline=toggleOnline;
 </script>
