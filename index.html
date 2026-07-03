@@ -5,28 +5,29 @@
 <title>SafePaws Rider V2.9</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',Arial;background:#0f172a;color:#e5e7eb;overflow:hidden}
-#splash{position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeOut .5s ease 1.5s forwards}
-/* PALIT: MOTOR > CAR ANIMATION */
-#splash div{font-size:100px;animation:drive 1.2s cubic-bezier(.68,-.55,.265,1.55)} 
-@keyframes drive{0%{transform:translateX(-200px) scale(.8);opacity:0} 50%{transform:translateX(0) scale(1.1)} 100%{transform:translateX(0) scale(1);opacity:1}}
-@keyframes fadeOut{0%{opacity:1}100%{opacity:0;visibility:hidden}}
-#loginScreen{display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b)}
+*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',Arial;background:#0f172a;color:#e5e7eb}
+/* FIX 1: CAR ANIMATION LANG MAGFADE */
+#splash{position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:9999}
+#splash div{font-size:100px;animation:drive 1.2s cubic-bezier(.68,-.55,.265,1.55) forwards, fadeCar.5s ease 1.2s forwards}
+@keyframes drive{0%{transform:translateX(-200px) scale(.8);opacity:0} 100%{transform:translateX(0) scale(1);opacity:1}}
+@keyframes fadeCar{0%{opacity:1} 100%{opacity:0}}
+/* FIX 2: SCROLLABLE */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b)}
 .login-card{background:#1e293b;padding:28px;border-radius:16px;width:90%;max-width:380px;border:1px solid #334155}
 .login-card h1{text-align:center;margin:0 0 16px}
 .login-card input{width:100%;padding:14px;margin:8px 0;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e5e7eb}
 .login-card button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:10px;background:#38bdf8;color:#0f172a;font-weight:bold;cursor:pointer}
 .link{color:#38bdf8;text-align:center;margin-top:10px;cursor:pointer}
-#appScreen{display:none}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#1e293b;border-bottom:1px solid #334155;position:sticky;top:0}
+#appScreen{display:none;max-height:100vh;overflow-y:auto;padding-bottom:80px}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#1e293b;border-bottom:1px solid #334155;position:sticky;top:0;z-index:5}
 .logout{background:#dc2626;border:0;color:#fff;padding:8px 12px;border-radius:8px;font-weight:bold}
-.screen{display:none;padding:16px;padding-bottom:100px}
+.screen{display:none;padding:16px}
 .card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:12px;text-align:left}
 .card.center{text-align:center;padding:40px 20px}
 .card input{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#e5e7eb}
-#map{height:300px;border-radius:12px;margin-top:12px}
+#map{height:250px;border-radius:12px;margin-top:12px;display:none} /* HIDE MUNA */
 .btn{width:100%;padding:16px;border:0;border-radius:12px;background:#16a34a;color:#fff;font-weight:bold;font-size:16px;cursor:pointer;margin-top:8px}
-.btn.off{background:#dc2626} .btn.reject{background:#dc2626} .btn:disabled{opacity:0.5;cursor:not-allowed}
+.btn.off{background:#dc2626}.btn.reject{background:#dc2626}.btn.nav{background:#38bdf8;color:#0f172a}.btn:disabled{opacity:0.5}
 .status-card h2{font-size:32px;margin:0 0 10px}
 .pending{color:#f59e0b}.approved{color:#16a34a}.rejected{color:#dc2626}.active{color:#38bdf8}
 nav{position:fixed;bottom:0;left:0;right:0;background:#1e293b;border-top:1px solid #334155;display:flex;z-index:10}
@@ -37,11 +38,14 @@ small{color:#94a3b8}
 .badge{background:#dc2626;color:#fff;padding:2px 6px;border-radius:50%;font-size:10px;margin-left:4px;vertical-align:top}
 .row{display:flex;justify-content:space-between;align-items:center;margin:6px 0}
 .muted{color:#94a3b8;font-size:14px;line-height:1.6}
+.earnings-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.earn-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;text-align:center}
+.earn-card h4{margin:0;color:#94a3b8;font-size:12px}
+.earn-card p{margin:8px 0 0;font-size:24px;font-weight:bold;color:#38bdf8}
 </style>
 </head>
 <body>
-<!-- PALIT: 🏍️ > 🚗 -->
-<div id="splash"><div>🚗</div></div> 
+<div id="splash"><div>🚗</div></div>
 
 <div id="loginScreen">
 <div class="login-card">
@@ -79,7 +83,7 @@ small{color:#94a3b8}
 <div class="card" style="text-align:left;margin-top:20px">
 <b>What happens next?</b>
 <div class="muted" style="margin-top:8px">
-1. Admin will review your documents in <b>24-48 hours</b><br>
+1. Admin will review in <b>24-48 hours</b><br>
 2. You'll get notified here once approved<br>
 3. You can go online after approval
 </div>
@@ -97,14 +101,19 @@ small{color:#94a3b8}
 <div id="approvedScreen" style="display:none">
 <div class="card center">
 <h2 class="approved">✅ You're Approved!</h2>
-<p class="muted">Welcome to SafePaws, <span id="riderName"></span>!</p>
+<p class="muted">Welcome, <span id="riderName"></span>!</p>
+</div>
+<!-- FIX 3: EARNINGS TODAY -->
+<div class="earnings-grid">
+<div class="earn-card"><h4>Today</h4><p id="earnToday">₱0</p></div>
+<div class="earn-card"><h4>Total</h4><p id="earnTotal">₱0</p></div>
 </div>
 <div class="card">
 <h3 style="margin-top:0">Go Online</h3>
 <button id="onlineBtn" class="btn off" onclick="toggleOnline()">OFFLINE</button>
 <small id="onlineStatus">Tap to start accepting bookings</small>
 </div>
-<div id="map"></div>
+<div id="map"></div> <!-- SHOW LANG PAG ONLINE -->
 </div>
 </div>
 
@@ -114,7 +123,7 @@ small{color:#94a3b8}
 </div>
 
 <div id="earningsTab" class="screen tab">
-<div class="card"><h3>💰 Earnings</h3><p id="earningsText" style="font-size:28px;font-weight:bold">₱0.00</p></div>
+<div class="card"><h3>💰 Lifetime Earnings</h3><p id="earningsText" style="font-size:28px;font-weight:bold">₱0.00</p></div>
 </div>
 
 <div id="profileTab" class="screen tab">
@@ -143,23 +152,22 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// PALITAN MO TO NG IYO. DAPAT PAREHO KAY CUSTOMER
-const firebaseConfig = { 
+const firebaseConfig = {
   apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os",
   authDomain: "safepaws-batangas.firebaseapp.com",
   projectId: "safepaws-batangas",
   storageBucket: "safepaws-batangas.firebasestorage.app",
   messagingSenderId: "629904615191",
-  appId: "1:629904615191:web:45f7148d65ba61a867f952" 
+  appId: "1:629904615191:web:45f7148d65ba61a867f952"
 };
 
 const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
-let map, marker, uid, riderData, activeBookingId;
+let map, marker, routeLine, uid, riderData, activeBookingId, riderLat, riderLng;
 
 onAuthStateChanged(auth, async user=>{
 if(user){
 uid=user.uid;
-setTimeout(()=>{splash.style.display='none';},1600);
+setTimeout(()=>{splash.style.display='none';},1700); // Wait car fade
 loginScreen.style.display='none'; signupScreen.style.display='none'; appScreen.style.display='block';
 checkStatus(); listenBookings();
 }else{
@@ -169,20 +177,42 @@ splash.style.display='flex'; loginScreen.style.display='flex'; appScreen.style.d
 
 async function checkStatus(){
 const ref = doc(db,'riders',uid);
+const hasSeenStatus = localStorage.getItem('seenStatus_'+uid); // 1 TIME LANG FOR GOOD
+
 onSnapshot(ref, snap=>{
 if(!snap.exists()) return;
 riderData = snap.data();
 pName.value = riderData.name || ''; pPhone.value = riderData.phone || ''; pPlate.value = riderData.plate || '';
 pStatus.textContent = riderData.status || ''; riderName.textContent = riderData.name || 'Rider';
 earningsText.textContent = `₱${riderData.earnings||0}`;
-pendingScreen.style.display='none'; rejectedScreen.style.display='none'; approvedScreen.style.display='none';
+earnTotal.textContent = `₱${riderData.earnings||0}`;
+earnToday.textContent = `₱${riderData.earningsToday||0}`;
+
+// 1 TIME LANG TO LALABAS
+if(!hasSeenStatus){
+  pendingScreen.style.display='none'; rejectedScreen.style.display='none'; approvedScreen.style.display='none';
+  if(riderData.status==='approved'){
+    approvedScreen.style.display='block'; 
+    if(riderData.online){ map.style.display='block'; if(!map._leaflet_id) initMap(); }
+  }else if(riderData.status==='rejected'){
+    rejectedScreen.style.display='block'; rejectReason.textContent = riderData.rejectedReason || 'Invalid documents';
+  }else{ pendingScreen.style.display='block'; }
+  localStorage.setItem('seenStatus_'+uid, 'true');
+}else{
+  // Pag nakita na, Home lang lagi
+  pendingScreen.style.display='none'; rejectedScreen.style.display='none'; 
+  if(riderData.status==='approved'){ approvedScreen.style.display='block'; if(riderData.online){ map.style.display='block'; if(!map._leaflet_id) initMap(); } }
+}
+
+// Live pa rin yung Online button
 if(riderData.status==='approved'){
-approvedScreen.style.display='block'; if(!map) initMap(); onlineBtn.disabled = false;
-if(riderData.online){ onlineBtn.classList.remove('off');onlineBtn.textContent='ONLINE'; onlineStatus.textContent='You are visible to customers'; }
-else{ onlineBtn.classList.add('off');onlineBtn.textContent='OFFLINE'; onlineStatus.textContent='Tap to start accepting bookings'; }
-}else if(riderData.status==='rejected'){
-rejectedScreen.style.display='block'; rejectReason.textContent = riderData.rejectedReason || 'Invalid or incomplete documents';
-}else{ pendingScreen.style.display='block'; }
+  if(riderData.online){
+    onlineBtn.classList.remove('off');onlineBtn.textContent='ONLINE'; onlineStatus.textContent='You are visible';
+  }else{
+    onlineBtn.classList.add('off');onlineBtn.textContent='OFFLINE'; onlineStatus.textContent='Tap to start';
+  }
+  onlineBtn.disabled = false;
+}
 });
 }
 
@@ -208,13 +238,16 @@ ${active.status==='assigned'? `
 <button class="btn" onclick="acceptBooking('${active.id}')">Accept</button>
 <button class="btn reject" onclick="rejectBooking('${active.id}')">Reject</button>
 ` : active.status==='accepted'? `
+<button class="btn nav" onclick="showRoute(${active.pickupLat},${active.pickupLng},${active.dropoffLat},${active.dropoffLng})">Navigate</button>
 <button class="btn" onclick="startTrip('${active.id}')">Start Trip</button>
 ` : active.status==='picking'? `
+<button class="btn nav" onclick="showRoute(${active.dropoffLat},${active.dropoffLng})">Navigate to Drop</button>
 <button class="btn" onclick="completeTrip('${active.id}')">Complete Trip</button>
 ` : ''}
 </div>
 `;
-}else{ activeBooking.innerHTML = '<div class="card"><p>No active booking</p></div>'; }
+drawRoute(active);
+}else{ activeBooking.innerHTML = '<div class="card"><p>No active booking</p></div>'; if(routeLine) map.removeLayer(routeLine); }
 bookingsList.innerHTML = bookings.filter(b=>b.status==='completed').map(b=>`
 <div class="card"><b>${b.petName}</b> - ${b.pickup} > ${b.dropoff}<br><small>₱${b.fee} | Completed</small></div>
 `).join('');
@@ -230,7 +263,10 @@ window.startTrip=startTrip;
 async function completeTrip(id){
 const snap = await getDoc(doc(db,'bookings',id)); const fee = Number(snap.data().fee) || 0;
 await updateDoc(doc(db,'bookings',id),{status:'completed'});
-await updateDoc(doc(db,'riders',uid),{earnings:(Number(riderData.earnings)||0)+fee});
+await updateDoc(doc(db,'riders',uid),{
+earnings:(Number(riderData.earnings)||0)+fee,
+earningsToday:(Number(riderData.earningsToday)||0)+fee
+});
 alert(`Trip completed! +₱${fee}`);
 }
 window.completeTrip=completeTrip;
@@ -239,7 +275,7 @@ window.saveProfile=saveProfile;
 async function signup(){
 const cred=await createUserWithEmailAndPassword(auth,suEmail.value,suPass.value);
 await setDoc(doc(db,'riders',cred.user.uid),{
-name:name.value,phone:phone.value,plate:plate.value,email:suEmail.value,status:'pending',online:false,earnings:0,lat:null,lng:null,rejectedReason:''
+name:name.value,phone:phone.value,plate:plate.value,email:suEmail.value,status:'pending',online:false,earnings:0,earningsToday:0,lat:null,lng:null,rejectedReason:''
 });
 alert('Signup success! Wait for admin approval.'); showLogin();
 }
@@ -249,20 +285,46 @@ window.login=login;
 window.logout=()=>signOut(auth);
 window.showSignup=()=>{loginScreen.style.display='none';signupScreen.style.display='flex';}
 window.showLogin=()=>{signupScreen.style.display='none';loginScreen.style.display='flex';}
-function switchTab(id,btn){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active')); document.getElementById(id).classList.add('active'); btn.classList.add('active'); headerTitle.textContent=btn.innerText.split('\n')[0]; }
+function switchTab(id,btn){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active')); document.getElementById(id).classList.add('active'); headerTitle.textContent=btn.innerText.split('\n')[0]; }
 window.switchTab=switchTab;
 
 function initMap(){
 map=L.map('map').setView([13.96,121.12],13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
 marker=L.marker([13.96,121.12]).addTo(map);
 navigator.geolocation.watchPosition(p=>{
-const {latitude:lat,longitude:lng}=p.coords; marker.setLatLng([lat,lng]); map.setView([lat,lng]);
-if(uid && riderData?.online) updateDoc(doc(db,'riders',uid),{lat,lng});
-});
+riderLat=p.coords.latitude; riderLng=p.coords.longitude;
+marker.setLatLng([riderLat,riderLng]); map.setView([riderLat,riderLng]);
+if(uid && riderData?.online) updateDoc(doc(db,'riders',uid),{lat:riderLat,lng:riderLng});
+},{enableHighAccuracy:true});
 }
 
-async function toggleOnline(){ onlineBtn.disabled = true; try{ const ref=doc(db,'riders',uid); const snap=await getDoc(ref); const on=!snap.data().online; await updateDoc(ref,{online:on}); }catch(e){ alert('Error: '+e.message); onlineBtn.disabled = false; } }
+function showRoute(lat1,lng1,lat2,lng2){
+if(!map) return;
+map.style.display='block';
+const pts = [[riderLat||13.96,riderLng||121.12],[lat1,lng1]];
+if(lat2) pts.push([lat2,lng2]);
+if(routeLine) map.removeLayer(routeLine);
+routeLine = L.polyline(pts,{color:'#38bdf8',weight:5}).addTo(map);
+map.fitBounds(routeLine.getBounds());
+}
+window.showRoute=showRoute;
+
+function drawRoute(b){
+if(!map ||!b.pickupLat) return;
+showRoute(b.pickupLat,b.pickupLng,b.dropoffLat,b.dropoffLng);
+}
+
+async function toggleOnline(){
+onlineBtn.disabled = true;
+try{
+const ref=doc(db,'riders',uid);
+const snap=await getDoc(ref);
+const on=!snap.data().online;
+await updateDoc(ref,{online:on});
+if(!on) await updateDoc(ref,{earningsToday:0}); // Reset pag offline
+}catch(e){ alert('Error: '+e.message); }finally{onlineBtn.disabled = false;}
+}
 window.toggleOnline=toggleOnline;
 </script>
 </body>
