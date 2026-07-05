@@ -1,408 +1,345 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SafePaws🐾 V10.5</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial; }
-  body { background: #f5f5f5; overflow: hidden; }
-  #map { height: 100vh; width: 100%; z-index: 1; }
-  #sheet { 
-    position: fixed; bottom: 0; left: 0; right: 0; 
-    background: white; border-radius: 24px 24px 0 0; 
-    padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.15); 
-    max-height: 90vh; overflow-y: auto; z-index: 1000;
-    transition: transform 0.3s ease;
-  }
-  .handle { 
-    width: 50px; height: 6px; background: #ddd; 
-    border-radius: 10px; margin: 0 auto 15px; cursor: grab; 
-  }
-  .handle:active { cursor: grabbing; }
-  h2 { color: #009688; margin-bottom: 15px; }
-  label { font-weight: 600; font-size: 14px; display: block; margin-top: 10px; }
-  select, button, input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ccc; font-size: 15px; }
-  button.primary { background: #009688; color: white; border: none; font-weight: bold; font-size: 16px; }
-  button.secondary { background: #e0f2f1; color: #009688; border: 1px solid #009688; }
-  .row { display: flex; gap: 10px; }
-  .row select { flex: 1; }
-  .receipt { background: #e0f2f1; padding: 15px; border-radius: 12px; margin-top: 15px; border-left: 4px solid #009688; }
-  .badge { background: #ff9800; color: white; padding: 4px 8px; border-radius: 6px; font-size: 12px; }
-  #petForm { background: #f1f8e9; padding: 12px; border-radius: 10px; margin: 10px 0; display: none; }
-  .clinic-option { background: #fff3e0; padding: 10px; border-radius: 8px; margin: 5px 0; cursor: pointer; border: 1px solid #ff9800; }
-  #fareBox { background:#fff3e0; padding:10px; border-radius:8px; margin:10px 0; display:block; } /* LAGING VISIBLE */
-</style>
-</head>
-<body>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"> 
+<title>SafePaws Rider V2.9.5 FINAL</title> 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style> 
+*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',Arial;background:#0f172a;color:#e5e7eb;overflow-y:auto} 
+#splash{position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeCar .5s ease 1.2s forwards} 
+#splash div{font-size:100px;animation:drive 1.2s ease-out forwards} 
+@keyframes drive{0%{transform:translateX(200px);opacity:0}80%{opacity:1}100%{transform:translateX(0);opacity:1}} 
+@keyframes fadeCar{0%{opacity:1}100%{opacity:0;visibility:hidden}} 
+#loginScreen{display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b)} 
+.login-card{background:#1e293b;padding:28px;border-radius:16px;width:90%;max-width:380px;border:1px solid #334155} 
+.login-card h1{text-align:center;margin:0 0 16px} 
+.login-card input{width:100%;padding:14px;margin:8px 0;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e5e7eb} 
+.login-card button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:10px;background:#38bdf8;color:#0f172a;font-weight:bold;cursor:pointer} 
+.link{color:#38bdf8;text-align:center;margin-top:10px;cursor:pointer} 
+#appScreen{display:none;max-height:100vh;overflow-y:auto;padding-bottom:80px} 
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#1e293b;border-bottom:1px solid #334155;position:sticky;top:0;z-index:5} 
+.logout{background:#dc2626;border:0;color:#fff;padding:8px 12px;border-radius:8px;font-weight:bold} 
+.screen{display:none;padding:16px} 
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:12px;text-align:left} 
+.card.center{text-align:center;padding:40px 20px} 
+.card input{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#e5e7eb} 
+#map{height:250px;border-radius:12px;margin-top:12px;display:none} 
+.btn{width:100%;padding:16px;border:0;border-radius:12px;background:#16a34a;color:#fff;font-weight:bold;font-size:16px;cursor:pointer;margin-top:8px} 
+.btn.off{background:#dc2626}.btn.reject{background:#dc2626}.btn.blue{background:#38bdf8} 
+.btn:disabled{opacity:0.5;cursor:not-allowed} 
+.pending{color:#f59e0b}.approved{color:#16a34a}.rejected{color:#dc2626}.active{color:#38bdf8} 
+nav{position:fixed;bottom:0;left:0;right:0;background:#1e293b;border-top:1px solid #334155;display:flex;z-index:10} 
+nav button{flex:1;padding:12px;background:0;border:0;color:#94a3b8;font-size:12px;cursor:pointer} 
+nav button.active{color:#38bdf8;background:#0f172a} 
+.tab{display:none}.tab.active{display:block} 
+small{color:#94a3b8} 
+.badge{background:#dc2626;color:#fff;padding:2px 6px;border-radius:50%;font-size:10px;margin-left:4px;vertical-align:top} 
+.row{display:flex;justify-content:space-between;align-items:center;margin:6px 0} 
+.muted{color:#94a3b8;font-size:14px;line-height:1.6} 
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px} 
+.history-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #334155} 
+</style> 
+</head> 
+<body> 
+<div id="splash"><div>🚗</div></div> 
 
-<div id="map"></div>
+<div id="loginScreen"> 
+    <div class="login-card"> 
+        <h1>🏍️ SafePaws Rider</h1> 
+        <input id="email" type="email" placeholder="Email"> 
+        <input id="pass" type="password" placeholder="Password"> 
+        <button onclick="login()">Login</button> 
+        <div class="link" onclick="showSignup()">No account? Sign up</div> 
+    </div> 
+</div> 
 
-<div id="sheet">
-  <div class="handle"></div>
-  <h2>Book a Service <span class="badge">V10.5</span></h2>
+<div id="signupScreen" style="display:none"> 
+    <div class="login-card"> 
+        <h1>📝 Rider Signup</h1> 
+        <input id="name" placeholder="Full Name"> 
+        <input id="phone" placeholder="Phone"> 
+        <input id="plate" placeholder="Plate Number"> 
+        <input id="suEmail" type="email" placeholder="Email"> 
+        <input id="suPass" type="password" placeholder="Password"> 
+        <button onclick="signup()">Sign Up</button> 
+        <div class="link" onclick="showLogin()">Back to Login</div> 
+    </div> 
+</div> 
 
-  <label>Your Pets</label>
-  <div class="row">
-    <select id="petSelect"></select>
-    <button class="secondary" onclick="togglePetForm()" style="width:60px;">+ Add</button>
-  </div>
+<div id="appScreen"> 
+    <header> 
+        <h3 id="headerTitle">🏠 Home</h3> 
+        <button class="logout" onclick="logout()">Logout</button> 
+    </header> 
+    <main> 
+        <div id="homeTab" class="screen tab active"> 
+            <div id="pendingScreen" class="card center" style="display:none"> 
+                <h2 class="pending">⏳ Application Submitted</h2> 
+                <p class="muted">Status: <b>Pending Review</b></p> 
+            </div> 
+            <div id="rejectedScreen" class="card center" style="display:none"> 
+                <h2 class="rejected">❌ Application Rejected</h2> 
+                <p class="muted">Status: <b>Rejected</b></p> 
+                <div class="card" style="text-align:left;margin-top:20px;background:#2c1a1a;border-color:#dc2626"> 
+                    <b>Reason:</b> <span id="rejectReason" class="muted">Invalid documents</span> 
+                </div> 
+            </div> 
+            <div id="approvedScreen" style="display:none"> 
+                <div id="approvedCard" class="card center" style="display:none"> 
+                    <h2 class="approved">✅ You're Approved!</h2> 
+                    <p class="muted">Welcome to SafePaws, <span id="riderName"></span>!</p> 
+                </div> 
+                <div class="card"> 
+                    <h3 style="margin-top:0">Go Online</h3> 
+                    <button id="onlineBtn" class="btn off" onclick="toggleOnline()">OFFLINE</button> 
+                    <small id="onlineStatus">Tap to start accepting bookings</small> 
+                </div> 
+                <div id="map"></div> 
+            </div> 
+        </div> 
+        <div id="bookingsTab" class="screen tab"> 
+            <div id="activeBooking"></div> 
+            <div id="bookingsList"></div> 
+        </div> 
+        <div id="earningsTab" class="screen tab"> 
+            <div class="grid-2"> 
+                <div class="card center"><h4>Today</h4><p id="earningsToday" style="font-size:24px;font-weight:bold;margin:8px 0">₱0.00</p></div> 
+                <div class="card center"><h4>Total</h4><p id="earningsTotal" style="font-size:24px;font-weight:bold;margin:8px 0">₱0.00</p></div> 
+            </div> 
+            <div class="card"> 
+                <h3>📅 Earnings History</h3> 
+                <div id="earningsHistory"></div> 
+            </div> 
+        </div> 
+        <div id="profileTab" class="screen tab"> 
+            <div class="card"> 
+                <h3>👤 My Profile</h3> 
+                <input id="pName" placeholder="Full Name"> 
+                <input id="pPhone" placeholder="Phone"> 
+                <input id="pPlate" placeholder="Plate Number"> 
+                <small>Status: <span id="pStatus"></span></small> 
+                <button class="btn" style="margin-top:12px" onclick="saveProfile()">Save Changes</button> 
+            </div> 
+        </div> 
+    </main> 
+    <nav> 
+        <button class="active" onclick="switchTab('homeTab',this)">🏠<br>Home</button> 
+        <button onclick="switchTab('bookingsTab',this)">📦<br>Bookings<span id="bookingBadge" class="badge" style="display:none">0</span></button> 
+        <button onclick="switchTab('earningsTab',this)">💰<br>Earnings</button> 
+        <button onclick="switchTab('profileTab',this)">👤<br>Profile</button> 
+    </nav> 
+</div> 
 
-  <div id="petForm">
-    <input type="text" id="petName" placeholder="Pet Name" required>
-    <select id="petType" required>
-      <option value="">Select Pet Type</option>
-      <option value="Dog">Dog</option>
-      <option value="Cat">Cat</option>
-      <option value="Bird">Bird</option>
-      <option value="Rabbit">Rabbit</option>
-    </select>
-    <select id="petSize" required> <!-- DAGDAG PET SIZE -->
-      <option value="">Select Pet Size</option>
-      <option value="Small">Small - x1.0</option>
-      <option value="Medium">Medium - x1.5</option>
-      <option value="Large">Large - x2.0</option>
-    </select>
-    <input type="text" id="petBreed" placeholder="Breed">
-    <input type="date" id="petBirthdate" required>
-    <button class="primary" onclick="savePet()">Save Pet</button>
-  </div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> 
+<script type="module"> 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"; 
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"; 
+import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"; 
 
-  <label>Service Type</label>
-  <select id="serviceSelect" onchange="updatePins()">
-    <option value="Pet Transport">Pet Transport - 2 Pins</option>
-    <option value="Vet Clinic">Vet Clinic - Choose Nearest</option>
-    <option value="Grooming">Grooming - Choose Nearest</option>
-    <option value="Clinic">Clinic - Choose Nearest</option>
-    <option value="Emergency">Emergency - +₱100</option>
-  </select>
+const firebaseConfig = { 
+    apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os",
+    authDomain: "safepaws-batangas.firebaseapp.com",
+    databaseURL: "https://safepaws-batangas-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "safepaws-batangas",
+    storageBucket: "safepaws-batangas.firebasestorage.app",
+    messagingSenderId: "629904615191",
+    appId: "1:629904615191:web:45f7148d65ba61a867f952"
+}; 
 
-  <div id="clinicList" style="display:none; margin:10px 0;">
-    <label>Select Nearest Clinic:</label>
-    <div id="clinicOptions"></div>
-    <button class="secondary" onclick="manualPinMode()">Or Tap Map Manually</button>
-  </div>
+const app = initializeApp(firebaseConfig); 
+const auth = getAuth(app); 
+const db = getFirestore(app); 
+let map, marker, routeLine, uid, riderData;
 
-  <p id="pinInfo" style="font-size:13px; color:#666; margin:10px 0;">📍 Tap map: 2 pins needed</p>
+onAuthStateChanged(auth, async user=>{ 
+    if(user){ 
+        uid=user.uid; 
+        setTimeout(()=>{splash.style.display='none';},1700); 
+        loginScreen.style.display='none'; 
+        signupScreen.style.display='none'; 
+        appScreen.style.display='block'; 
+        await ensureRiderDoc(user.uid); 
+        checkStatus(); 
+        listenBookings(); 
+        checkDailyReset(); 
+    }else{ 
+        splash.style.display='flex'; 
+        loginScreen.style.display='flex'; 
+        appScreen.style.display='none'; 
+    } 
+}); 
 
-  <div id="fareBox"> <!-- LAGING NAKIKITA -->
-    <b>Est. Fare:</b> <span id="fareAmount">₱0.00</span><br>
-    <small id="fareBreakdown">Base: ₱200</small>
-  </div>
-
-  <button class="primary" onclick="requestBooking()">Request Now</button>
-  <div id="receiptBox"></div>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os",
-  authDomain: "safepaws-batangas.firebaseapp.com",
-  databaseURL: "https://safepaws-batangas-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "safepaws-batangas",
-  storageBucket: "safepaws-batangas.firebasestorage.app",
-  messagingSenderId: "629904615191",
-  appId: "1:629904615191:web:45f7148d65ba61a867f952"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
-
-const BASE = 200;
-const PER_KM = 20;
-const EMERGENCY_FEE = 100;
-const SIZE_MULTIPLIER = {Small: 1.0, Medium: 1.5, Large: 2.0};
-
-let pets = [];
-let pickupPin = null;
-let dropPin = null;
-let pickupMarker, dropMarker;
-let userLocation = null;
-let manualMode = false;
-let currentUser = null;
-let currentBookingId = null;
-
-const clinics = [
-  {name: "Batangas Animal Clinic", lat: 13.7561, lng: 121.0583, type: "Vet Clinic", address: "Batangas City"},
-  {name: "Pawsome Grooming Studio", lat: 13.7580, lng: 121.0600, type: "Grooming", address: "Batangas City"},
-  {name: "Lipa Pet Care Center", lat: 13.9412, lng: 121.1625, type: "Vet Clinic", address: "Lipa City"},
-  {name: "Furry Friends Grooming", lat: 13.9430, lng: 121.1640, type: "Grooming", address: "Lipa City"},
-  {name: "Tanauan Veterinary Clinic", lat: 14.0831, lng: 121.1528, type: "Clinic", address: "Tanauan City"},
-  {name: "24/7 Emergency Pet Hospital", lat: 13.7570, lng: 121.0590, type: "Clinic", address: "Batangas City"}
-];
-let clinicMarkers = [];
-
-var map = L.map('map').setView([13.7561, 121.0583], 11);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-if(navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(pos => {
-    userLocation = {lat: pos.coords.latitude, lng: pos.coords.longitude};
-    map.setView([userLocation.lat, userLocation.lng], 13);
-    L.marker(userLocation).addTo(map).bindPopup("Your Current Location").openPopup();
-  });
-}
-
-auth.signInAnonymously().then(cred => {
-  currentUser = cred.user;
-  loadPets();
-}).catch(() => {
-  loadPetsLocal();
-});
-
-function loadPets() {
-  if(!currentUser) return loadPetsLocal();
-  db.collection('users').doc(currentUser.uid).collection('pets').get().then(snap => {
-    pets = [];
-    snap.forEach(doc => { pets.push({id: doc.id,...doc.data()}); });
-    renderPets();
-  }).catch(() => loadPetsLocal());
-}
-
-function loadPetsLocal() {
-  pets = JSON.parse(localStorage.getItem('safepaws_pets')) || [];
-  renderPets();
-}
-
-function getRequiredPins() {
-  let service = document.getElementById('serviceSelect').value;
-  if(service == 'Pet Transport') return 2;
-  if(service == 'Vet Clinic' || service == 'Grooming' || service == 'Clinic') return 1;
-  return 0;
-}
-
-function updatePins() {
-  pickupPin = null; dropPin = null; manualMode = false;
-  if(pickupMarker) map.removeLayer(pickupMarker);
-  if(dropMarker) map.removeLayer(dropMarker);
-  clinicMarkers.forEach(m => map.removeLayer(m)); clinicMarkers = [];
-  document.getElementById('clinicList').style.display = 'none';
-
-  let service = document.getElementById('serviceSelect').value;
-  document.getElementById('pinInfo').innerText = `Tap map: ${getRequiredPins()} pin(s) needed`;
-  checkFare(); // UPDATE FARE ON CHANGE
-
-  if(service == 'Vet Clinic' || service == 'Grooming' || service == 'Clinic') {
-    showClinicOptions(service);
-  }
-}
-
-function showClinicOptions(serviceType) {
-  document.getElementById('clinicList').style.display = 'block';
-  let center = userLocation || {lat: 13.7561, lng: 121.0583};
-
-  let filtered = clinics
-   .filter(c => c.type == serviceType)
-   .map(c => ({...c, dist: getDistanceKm(center, c)}))
-   .sort((a,b) => a.dist - b.dist).slice(0, 5);
-
-  let optionsDiv = document.getElementById('clinicOptions');
-  optionsDiv.innerHTML = '';
-  filtered.forEach((c) => {
-    optionsDiv.innerHTML += `<div class="clinic-option" onclick="selectClinic(${c.lat}, ${c.lng}, '${c.name}')"><b>${c.name}</b><br><small>${c.address} - ${c.dist.toFixed(2)} km away</small></div>`;
-    let marker = L.marker([c.lat, c.lng]).addTo(map).bindPopup(`<b>${c.name}</b><br>${c.address}<br>${c.dist.toFixed(2)} km`);
-    clinicMarkers.push(marker);
-  });
-}
-
-function selectClinic(lat, lng, name) {
-  if(dropMarker) map.removeLayer(dropMarker);
-  dropPin = {lat, lng}; dropMarker = L.marker([lat, lng]).addTo(map).bindPopup(`Selected: ${name}`).openPopup();
-  map.setView([lat, lng], 15); checkFare();
-}
-
-function manualPinMode() { manualMode = true; alert("Tap the map to set custom location for your pet"); document.getElementById('clinicList').style.display = 'none'; }
-
-map.on('click', function(e) {
-  let service = document.getElementById('serviceSelect').value;
-  let req = getRequiredPins();
-  if((service == 'Vet Clinic' || service == 'Grooming' || service == 'Clinic') && manualMode) {
-    if(dropMarker) map.removeLayer(dropMarker);
-    dropPin = e.latlng; dropMarker = L.marker(dropPin).addTo(map).bindPopup("Custom Location").openPopup(); checkFare(); return;
-  }
-  if(req == 2 &&!pickupPin) {
-    pickupPin = e.latlng; if(pickupMarker) map.removeLayer(pickupMarker);
-    pickupMarker = L.marker(pickupPin).addTo(map).bindPopup("Pickup Location").openPopup(); checkFare();
-  } else if(req >= 1 && service == 'Pet Transport') {
-    dropPin = e.latlng; if(dropMarker) map.removeLayer(dropMarker);
-    dropMarker = L.marker(dropPin).addTo(map).bindPopup("Drop Location").openPopup(); checkFare();
-  }
-});
-
-function togglePetForm() {
-  let form = document.getElementById('petForm');
-  form.style.display = form.style.display == 'block'? 'none' : 'block';
-}
-
-function renderPets() {
-  let select = document.getElementById('petSelect');
-  select.innerHTML = '<option value="">-- Select Pet --</option>';
-  pets.forEach((p, i) => {
-    let age = calcAge(p.birthdate);
-    select.innerHTML += `<option value="${p.id || i}">${p.name} - ${p.petType} - ${p.petSize || 'N/A'} - ${age} yrs</option>`;
-  });
-}
-
-function savePet() {
-  let name = document.getElementById('petName').value;
-  let petType = document.getElementById('petType').value;
-  let petSize = document.getElementById('petSize').value; // #DAG
-  let breed = document.getElementById('petBreed').value;
-  let birthdate = document.getElementById('petBirthdate').value;
-  if(!name ||!petType ||!petSize ||!birthdate) return alert("Please fill all required fields");
-
-  let newPet = {name, petType, petSize, breed, birthdate, createdAt: new Date()};
-
-  if(currentUser) {
-    db.collection('users').doc(currentUser.uid).collection('pets').add(newPet).then(() => {
-      alert("Pet Saved to Firebase!");
-      document.getElementById('petName').value = '';
-      document.getElementById('petType').value = '';
-      document.getElementById('petSize').value = '';
-      document.getElementById('petBreed').value = '';
-      document.getElementById('petBirthdate').value = '';
-      togglePetForm(); loadPets();
-    }).catch(err => alert("Save Error: " + err.message));
-  } else {
-    pets.push(newPet); localStorage.setItem('safepaws_pets', JSON.stringify(pets));
-    alert("Pet Saved Locally!");
-    document.getElementById('petName').value = '';
-    document.getElementById('petType').value = '';
-    document.getElementById('petSize').value = '';
-    document.getElementById('petBreed').value = '';
-    document.getElementById('petBirthdate').value = '';
-    togglePetForm(); renderPets();
-  }
-}
-
-function calcAge(birthdate) {
-  let diff = new Date() - new Date(birthdate);
-  return Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
-}
-
-function getDistanceKm(p1, p2) { return map.distance([p1.lat, p1.lng], [p2.lat, p2.lng]) / 1000; }
-
-function calcFare(km, service, petSize) { // #AYOS NA FARE
-  let fare = BASE;
-  if(service == 'Emergency') fare += EMERGENCY_FEE;
-  fare += (km * PER_KM);
-  fare = fare * (SIZE_MULTIPLIER[petSize] || 1.0);
-  return fare;
-}
-
-function checkFare() { // #LAGING COMPUTE
-  let service = document.getElementById('serviceSelect').value;
-  let petIndex = document.getElementById('petSelect').value;
-  let pet = pets[petIndex];
-  let km = (pickupPin && dropPin)? getDistanceKm(pickupPin, dropPin) : 0;
-  let fare = calcFare(km, service, pet ? pet.petSize : 'Small');
-  
-  document.getElementById('fareAmount').innerText = `₱${fare.toFixed(2)} - ${km.toFixed(2)} km`;
-  let breakdown = `Base: ₱${BASE}`;
-  if(service == 'Emergency') breakdown += ` + Emergency: ₱${EMERGENCY_FEE}`;
-  if(km > 0) breakdown += ` + KM: ₱${(km * PER_KM).toFixed(2)}`;
-  if(pet) breakdown += ` x ${pet.petSize}(${SIZE_MULTIPLIER[pet.petSize]})`;
-  document.getElementById('fareBreakdown').innerText = breakdown;
-}
-
-function requestBooking() {
-  let petIndex = document.getElementById('petSelect').value;
-  if(petIndex === "") return alert("Please select a pet");
-  let pet = pets[petIndex];
-  let service = document.getElementById('serviceSelect').value;
-  if(getRequiredPins() > 0 &&!dropPin) return alert("Please set location");
-  if(getRequiredPins() == 2 &&!pickupPin) return alert("Please set pickup location");
-
-  let km = (pickupPin && dropPin)? getDistanceKm(pickupPin, dropPin) : 0;
-  let fare = calcFare(km, service, pet.petSize);
-
-  // #ITO YUNG PAPASOK SA RIDER/CLINIC APP
-  db.collection('bookings').add({
-    userId: currentUser? currentUser.uid : "guest",
-    service: service, pet: pet, pickup: pickupPin, drop: dropPin,
-    km: km.toFixed(2), fare: fare.toFixed(2), status: 'pending', // PENDING PARA MAKITA NG RIDER
-    petTypes: [pet.petType],
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  }).then((docRef) => {
-    currentBookingId = docRef.id;
-    alert(`Booking Sent! Waiting for rider...`);
-    listenForBookingUpdate(docRef.id); // #MAGHIHINTAY NG RECEIPT
-  }).catch(err => alert("Error: " + err.message));
-}
-
-// #HINDI NA AUTO RECEIPT. MAGHIHINTAY MUNA
-function listenForBookingUpdate(bookingId) {
-  db.collection('bookings').doc(bookingId).onSnapshot((doc) => {
-    if(doc.exists && doc.data().status == 'accepted') {
-      let data = doc.data();
-      if(data.service == 'Vet Clinic' || data.service == 'Clinic') {
-        document.getElementById('receiptBox').innerHTML = `
-          <div class="receipt">
-            <b>🧾 BILL FROM CLINIC</b><br><br>
-            Pet: ${data.pet.name} - ${data.pet.petType}<br>
-            Service: ${data.service}<br>
-            Consultation: ₱500<br>
-            Medicine: ₱350<br>
-            <hr style="margin:8px 0;">
-            <b>TOTAL: ₱850</b><br>
-            <small>Notes: Follow up after 2 weeks</small>
-          </div>
-        `;
-      }
+async function ensureRiderDoc(userId){
+    const ref = doc(db,'riders',userId);
+    const snap = await getDoc(ref);
+    if(!snap.exists()){
+        await setDoc(ref, { 
+            uid: userId, 
+            status: 'pending', 
+            earningsToday: 0, 
+            lastResetDate: new Date().toISOString().split('T')[0] 
+        }, {merge: true});
     }
-  });
 }
 
-// ===== DRAGGABLE SHEET AYOS NA TO =====
-let sheet = document.getElementById('sheet');
-let handle = document.querySelector('.handle');
-let startY = 0;
-let currentY = 0;
-let isDragging = false;
-
-handle.addEventListener('touchstart', startDrag);
-handle.addEventListener('mousedown', startDrag);
-
-function startDrag(e) {
-  isDragging = true;
-  startY = e.touches ? e.touches[0].clientY : e.clientY;
-  sheet.style.transition = 'none';
+async function checkDailyReset(){ 
+    const today = new Date().toISOString().split('T')[0]; 
+    const ref = doc(db,'riders',uid); 
+    const snap = await getDoc(ref); 
+    if(snap.exists()){ 
+        const data = snap.data(); 
+        if(data.lastResetDate !== today){ 
+            await updateDoc(ref, {earningsToday:0, lastResetDate:today}); 
+        } 
+    } 
 }
 
-document.addEventListener('touchmove', drag);
-document.addEventListener('mousemove', drag);
+async function checkStatus(){ 
+    const ref = doc(db,'riders',uid); 
+    onSnapshot(ref, snap=>{ 
+        if(!snap.exists()) return; 
+        riderData = snap.data(); 
+        document.getElementById('pName').value = riderData.name || ''; 
+        document.getElementById('pPhone').value = riderData.phone || ''; 
+        document.getElementById('pPlate').value = riderData.plate || ''; 
+        document.getElementById('pStatus').textContent = riderData.status || ''; 
+        document.getElementById('riderName').textContent = riderData.name || 'Rider'; 
+        document.getElementById('earningsToday').textContent = `₱${riderData.earningsToday||0}`; 
+        document.getElementById('earningsTotal').textContent = `₱${riderData.earnings||0}`; 
+        renderHistory(riderData.earningsHistory||[]); 
+        
+        pendingScreen.style.display='none'; 
+        rejectedScreen.style.display='none'; 
+        approvedScreen.style.display='none'; 
+        
+        if(riderData.status==='approved'){ 
+            approvedScreen.style.display='block'; 
+            onlineBtn.disabled = false; 
+            if(riderData.online){ 
+                onlineBtn.classList.remove('off'); 
+                onlineBtn.textContent='ONLINE'; 
+            }else{ 
+                onlineBtn.classList.add('off'); 
+                onlineBtn.textContent='OFFLINE'; 
+            } 
+        }else if(riderData.status==='rejected'){ 
+            rejectedScreen.style.display='block'; 
+            rejectReason.textContent = riderData.rejectedReason || 'Invalid or incomplete documents'; 
+        }else{ 
+            pendingScreen.style.display='block'; 
+        } 
+    }); 
+} 
 
-function drag(e) {
-  if(!isDragging) return;
-  let y = e.touches ? e.touches[0].clientY : e.clientY;
-  currentY = y - startY;
-  if(currentY > 0 && currentY < window.innerHeight * 0.8) {
-    sheet.style.transform = `translateY(${currentY}px)`;
-  }
-}
+function renderHistory(arr){ 
+    if(arr.length===0){ 
+        earningsHistory.innerHTML='<small class="muted">No history yet</small>'; 
+        return; 
+    } 
+    earningsHistory.innerHTML = arr.slice().reverse().map(h=>` 
+        <div class="history-item"><span>${h.date}</span><b>₱${h.amount}</b></div> 
+    `).join(''); 
+} 
 
-document.addEventListener('touchend', endDrag);
-document.addEventListener('mouseup', endDrag);
+function listenBookings(){ 
+    const q = query(collection(db,'bookings'), where('assignedRider','==',uid)); 
+    onSnapshot(q, snap=>{ 
+        const bookings = snap.docs.map(d=>({id:d.id,...d.data()})); 
+        const active = bookings.find(b=>['assigned','accepted','picking'].includes(b.status)); 
+        const pending = bookings.filter(b=>b.status==='assigned'); 
+        bookingBadge.style.display = pending.length>0?'inline-block':'none'; 
+        bookingBadge.textContent = pending.length; 
+        if(active){ 
+            activeBookingId = active.id; 
+            activeBooking.innerHTML = `<div class="card"><h3>Active Booking</h3></div>`; 
+        }else{ 
+            activeBooking.innerHTML = '<div class="card"><p>No active booking</p></div>'; 
+        } 
+    }); 
+} 
 
-function endDrag() {
-  if(!isDragging) return;
-  isDragging = false;
-  sheet.style.transition = 'transform 0.3s ease';
-  
-  if(currentY > 150) {
-    sheet.style.transform = 'translateY(75vh)';
-  } else {
-    sheet.style.transform = 'translateY(0)';
-  }
-  currentY = 0;
-}
-</script>
-</body>
+async function saveProfile(){ 
+    const nameVal = document.getElementById('pName').value;
+    const phoneVal = document.getElementById('pPhone').value;
+    const plateVal = document.getElementById('pPlate').value;
+    await updateDoc(doc(db,'riders',uid),{name:nameVal,phone:phoneVal,plate:plateVal}); 
+    alert('Profile Updated!'); 
+} 
+window.saveProfile=saveProfile; 
+
+async function signup(){ 
+    try{ 
+        const nameVal = document.getElementById('name').value.trim();
+        const phoneVal = document.getElementById('phone').value.trim();
+        const plateVal = document.getElementById('plate').value.trim();
+        const emailVal = document.getElementById('suEmail').value.trim();
+        const passVal = document.getElementById('suPass').value.trim();
+
+        if(!nameVal || !phoneVal || !plateVal || !emailVal || !passVal){
+            return alert('Please fill all fields');
+        }
+
+        const cred = await createUserWithEmailAndPassword(auth, emailVal, passVal); 
+        await setDoc(doc(db,'riders',cred.user.uid),{ 
+            name: nameVal,
+            phone: phoneVal,
+            plate: plateVal,
+            email: emailVal, 
+            status: 'pending',
+            online: false,
+            earnings: 0,
+            earningsToday: 0,
+            earningsHistory: [],
+            lastResetDate: new Date().toISOString().split('T')[0],
+            lat: null,
+            lng: null,
+            rejectedReason: ''
+        }); 
+        alert('Signup success! Wait for admin approval.'); 
+        showLogin(); 
+    }catch(e){ 
+        alert("ERROR: " + e.message); 
+    } 
+} 
+window.signup=signup; 
+
+async function login(){ 
+    try{
+        const emailVal = document.getElementById('email').value;
+        const passVal = document.getElementById('pass').value;
+        await signInWithEmailAndPassword(auth,emailVal,passVal);
+    } 
+    catch(e){alert(e.message);} 
+} 
+window.login=login; 
+window.logout=()=>signOut(auth); 
+window.showSignup=()=>{loginScreen.style.display='none';signupScreen.style.display='flex';} 
+window.showLogin=()=>{signupScreen.style.display='none';loginScreen.style.display='flex';} 
+
+function switchTab(id,btn){ 
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); 
+    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active')); 
+    document.getElementById(id).classList.add('active'); 
+    btn.classList.add('active'); 
+    headerTitle.textContent=btn.innerText.split('\n')[0]; 
+} 
+window.switchTab=switchTab; 
+
+async function toggleOnline(){ 
+    onlineBtn.disabled = true; 
+    try{ 
+        const ref=doc(db,'riders',uid); 
+        const snap=await getDoc(ref); 
+        const on=!snap.data().online; 
+        await updateDoc(ref,{online:on}); 
+    }catch(e){ 
+        alert('Error: '+e.message); 
+    } finally{ 
+        onlineBtn.disabled = false; 
+    } 
+} 
+window.toggleOnline=toggleOnline; 
+</script> 
+</body> 
 </html>
