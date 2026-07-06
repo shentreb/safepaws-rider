@@ -10,75 +10,81 @@
     .nav-item.active { color: #22d3ee; }
     .nav-item { color: #64748b; }
     .card { background: #1e293b; border-radius: 12px; padding: 20px; }
+    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-100%); } to { opacity: 1; transform: translateX(0); } }
+    .animate-slide-left { animation: slideInLeft 0.5s ease-out; }
+    .btn-press:active { transform: scale(0.97); }
   </style>
 </head>
 <body class="pb-20">
 
+  <!-- AUTH MODAL -->
+  <div id="authModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-30">
+    <div class="bg-[#1e293b] p-8 rounded-2xl w-11/12 max-w-sm">
+      <h2 class="text-2xl font-bold text-[#22d3ee] mb-4 text-center">SafePaws Rider</h2>
+      <input id="email" type="email" placeholder="Email" class="w-full p-3 bg-[#0a0f1a] rounded-lg mb-2">
+      <input id="password" type="password" placeholder="Password" class="w-full p-3 bg-[#0a0f1a] rounded-lg mb-4">
+      <button id="loginBtn" class="w-full bg-[#22d3ee] text-black font-bold p-3 rounded-lg mb-2 btn-press">Login</button>
+      <button id="signupBtn" class="w-full bg-gray-600 text-white font-bold p-3 rounded-lg mb-2 btn-press">Sign Up</button>
+      <p id="authError" class="text-red-500 text-sm mt-2 text-center"></p>
+      <p id="approvalText" class="text-yellow-400 text-xs mt-2 text-center hidden">Waiting for Admin Approval...</p>
+    </div>
+  </div>
+
   <!-- HEADER -->
-  <div class="flex justify-between items-center p-4">
-    <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" class="w-8">
-    <button id="logoutBtn" class="bg-red-600 px-4 py-1 rounded-lg font-bold text-sm">Logout</button>
-  </div>
-
-  <!-- 1. HOME PAGE -->
-  <div id="homePage" class="p-4">
-    <h2 class="text-lg font-bold text-[#22d3ee] mb-3">Go Online</h2>
-    <div class="card">
-      <button id="goOnlineBtn" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl text-lg">
-        ONLINE
-      </button>
-      <p id="onlineText" class="text-gray-400 text-sm mt-2">Tap to start accepting bookings</p>
+  <div id="mainApp" class="hidden">
+    <div class="flex justify-between items-center p-4">
+      <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" class="w-10">
+      <button id="logoutBtn" class="bg-red-600 px-4 py-1 rounded-lg font-bold text-sm btn-press">Logout</button>
     </div>
-  </div>
 
-  <!-- 2. BOOKINGS PAGE -->
-  <div id="bookingsPage" class="p-4 hidden">
-    <h2 class="text-lg font-bold text-[#22d3ee] mb-3">No active booking</h2>
-    <div id="bookingList"></div>
-  </div>
-
-  <!-- 3. EARNINGS PAGE -->
-  <div id="earningsPage" class="p-4 hidden">
-    <h2 class="text-lg font-bold text-[#22d3ee] mb-3">Earnings</h2>
-    <div class="grid grid-cols-2 gap-3 mb-4">
-      <div class="card text-center">
-        <p class="text-[#22d3ee] font-semibold">Today</p>
-        <p id="todayEarn" class="text-2xl font-bold">₱0</p>
-      </div>
-      <div class="card text-center">
-        <p class="text-[#22d3ee] font-semibold">Total</p>
-        <p id="totalEarn" class="text-2xl font-bold">₱0</p>
+    <!-- 1. HOME -->
+    <div id="homePage" class="p-4">
+      <h2 class="text-lg font-bold text-[#22d3ee] mb-3">Go Online</h2>
+      <div class="card">
+        <button id="goOnlineBtn" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl text-lg btn-press">ONLINE</button>
+        <p id="onlineText" class="text-gray-400 text-sm mt-2 text-center">Tap to start accepting bookings</p>
       </div>
     </div>
-    <div class="card">
-      <p class="text-[#22d3ee] font-semibold mb-2">📄 Earnings History</p>
-      <p id="historyText" class="text-gray-400 text-sm">No history yet</p>
-    </div>
-  </div>
 
-  <!-- 4. PROFILE PAGE -->
-  <div id="profilePage" class="p-4 hidden">
-    <h2 class="text-lg font-bold text-[#22d3ee] mb-3">👤 My Profile</h2>
-    <div class="card">
-      <input id="fullName" type="text" placeholder="Full Name" class="w-full p-3 bg-[#0a0f1a] rounded-lg mb-3">
-      <input id="phone" type="tel" placeholder="Phone" class="w-full p-3 bg-[#0a0f1a] rounded-lg mb-3">
-      <input id="plate" type="text" placeholder="Plate Number" class="w-full p-3 bg-[#0a0f1a] rounded-lg mb-3">
-      <p>Status: <span id="status" class="text-green-400">approved</span></p>
-      <button id="saveBtn" class="w-full bg-green-500 text-white font-bold py-3 rounded-xl mt-4">Save Changes</button>
+    <!-- 2. BOOKINGS -->
+    <div id="bookingsPage" class="p-4 hidden">
+      <h2 class="text-lg font-bold text-[#22d3ee] mb-3">No active booking</h2>
+      <div id="bookingList"></div>
     </div>
-  </div>
 
-  <!-- BOTTOM NAV -->
-  <div class="fixed bottom-0 left-0 right-0 bg-[#1e293b] flex justify-around py-3">
-    <button class="nav-item active flex-col items-center" onclick="showPage('homePage', this)"><span>🏠</span><span class="text-xs">Home</span></button>
-    <button class="nav-item flex-col items-center" onclick="showPage('bookingsPage', this)"><span>📋</span><span class="text-xs">Bookings</span></button>
-    <button class="nav-item flex-col items-center" onclick="showPage('earningsPage', this)"><span>💰</span><span class="text-xs">Earnings</span></button>
-    <button class="nav-item flex-col items-center" onclick="showPage('profilePage', this)"><span>👤</span><span class="text-xs">Profile</span></button>
+    <!-- 3. EARNINGS -->
+    <div id="earningsPage" class="p-4 hidden">
+      <h2 class="text-lg font-bold text-[#22d3ee] mb-3">Earnings</h2>
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="card text-center"><p class="text-[#22d3ee] font-semibold">Today</p><p id="todayEarn" class="text-2xl font-bold">₱0</p></div>
+        <div class="card text-center"><p class="text-[#22d3ee] font-semibold">Total</p><p id="totalEarn" class="text-2xl font-bold">₱0</p></div>
+      </div>
+    </div>
+
+    <!-- 4. PROFILE -->
+    <div id="profilePage" class="p-4 hidden">
+      <h2 class="text-lg font-bold text-[#22d3ee] mb-3">👤 My Profile</h2>
+      <div class="card">
+        <input id="fullName" type="text" placeholder="Full Name" class="w-full p-3 bg-[#0a0f1a] rounded-lg mb-3">
+        <input id="phone" type="tel" placeholder="Phone" class="w-full p-3 bg-[#0a0f1a] rounded-lg mb-3">
+        <input id="plate" type="text" placeholder="Plate Number" class="w-full p-3 bg-[#0a0f1a] rounded-lg mb-3">
+        <p>Status: <span id="status" class="text-yellow-400">pending</span></p>
+        <button id="saveBtn" class="w-full bg-green-500 text-white font-bold py-3 rounded-xl mt-4 btn-press">Save Changes</button>
+      </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <div class="fixed bottom-0 left-0 right-0 bg-[#1e293b] flex justify-around py-3">
+      <button class="nav-item active flex-col items-center btn-press" onclick="showPage('homePage', this)"><span class="text-xl">🏠</span><span class="text-xs">Home</span></button>
+      <button class="nav-item flex-col items-center btn-press" onclick="showPage('bookingsPage', this)"><span class="text-xl">📋</span><span class="text-xs">Bookings</span></button>
+      <button class="nav-item flex-col items-center btn-press" onclick="showPage('earningsPage', this)"><span class="text-xl">💰</span><span class="text-xs">Earnings</span></button>
+      <button class="nav-item flex-col items-center btn-press" onclick="showPage('profilePage', this)"><span class="text-xl">👤</span><span class="text-xs">Profile</span></button>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     
     const firebaseConfig = { 
@@ -98,15 +104,44 @@
     let unsubBookings = null;
     let currentUser = null;
 
-    // AUTH
+    // 1. SIGNUP / LOGIN / ADMIN APPROVAL
     onAuthStateChanged(auth, async user => {
-      if(!user) window.location.href = "login.html";
-      currentUser = user;
-      loadProfile();
-      listenToBookings();
+      if(user) {
+        currentUser = user;
+        const riderDoc = await getDoc(doc(db, "riders", user.uid));
+        if(riderDoc.exists()) {
+          const status = riderDoc.data().status;
+          if(status === "approved") {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            loadProfile();
+            listenToBookings();
+          } else {
+            document.getElementById('approvalText').classList.remove('hidden');
+            document.getElementById('authError').innerText = "Status: " + status + ". Wait for Admin approval.";
+          }
+        } else {
+          // First time signup
+          await setDoc(doc(db, "riders", user.uid), {email: user.email, status: "pending"});
+          document.getElementById('approvalText').classList.remove('hidden');
+        }
+      } else {
+        document.getElementById('authModal').classList.remove('hidden');
+        document.getElementById('mainApp').classList.add('hidden');
+      }
     });
 
-    // GO ONLINE / OFFLINE
+    document.getElementById('signupBtn').onclick = () => {
+      createUserWithEmailAndPassword(auth, email.value, password.value)
+      .catch(err => authError.textContent = err.message);
+    }
+    document.getElementById('loginBtn').onclick = () => {
+      signInWithEmailAndPassword(auth, email.value, password.value)
+      .catch(err => authError.textContent = err.message);
+    }
+    document.getElementById('logoutBtn').onclick = () => signOut(auth);
+
+    // 2. GO ONLINE / OFFLINE
     const goBtn = document.getElementById('goOnlineBtn');
     goBtn.onclick = () => {
       isOnline = !isOnline;
@@ -123,10 +158,12 @@
       }
     }
 
-    // LISTEN BOOKINGS
+    // 3. LISTEN BOOKINGS - CONNECTED TO CUSTOMER + CLINIC
+    // Hinahanap: status = "Booked" galing kay Customer
+    // Pag accept: status = "Rider Assigned" para makita ni Admin at Clinic
     function listenToBookings() {
       if(!isOnline) return;
-      const q = query(collection(db, "bookings"), where("status", "in", ["waiting_rider", "emergency", "assigned"]));
+      const q = query(collection(db, "bookings"), where("status", "==", "Booked"));
       unsubBookings = onSnapshot(q, snap=>{
         const list = document.getElementById('bookingList');
         list.innerHTML = "";
@@ -134,28 +171,36 @@
           document.getElementById('bookingsPage').querySelector('h2').innerText = "No active booking";
           return;
         }
-        document.getElementById('bookingsPage').querySelector('h2').innerText = "Incoming Bookings";
+        document.getElementById('bookingsPage').querySelector('h2').innerText = "🚨 Incoming Bookings";
+        let delay = 0;
         snap.forEach(d=>{
           const b = d.data();
           list.innerHTML += `
-          <div class="card mb-3">
-            <p><b>${b.type}</b> ${b.status==='emergency'?'🚨':''}</p>
-            <p>Pet: ${b.petName || b.pet?.name}</p>
+          <div class="card mb-3 animate-slide-left" style="animation-delay: ${delay}ms">
+            <p><b>${b.type}</b> ${b.type==='Emergency'?'🚨':''}</p>
+            <p>Pet: ${b.pet || b.petName}</p>
+            <p>From: ${b.pickupAddress || 'Customer'}</p>
+            <p>To: ${b.clinic || b.clinicName}</p>
             <p>Fare: ${b.fare}</p>
-            ${b.status === 'waiting_rider' || b.status === 'emergency' ? 
-            `<button onclick="acceptBooking('${d.id}')" class="bg-[#22d3ee] text-black font-bold px-4 py-2 rounded mt-2 w-full">ACCEPT</button>` : 
-            `<p class="text-green-400">Accepted</p>`}
+            <button onclick="acceptBooking('${d.id}')" class="bg-[#22d3ee] text-black font-bold px-4 py-2 rounded mt-2 w-full btn-press">ACCEPT</button>
           </div>`
+          delay += 150;
         })
       });
     }
 
     window.acceptBooking = async (id) => {
-      await updateDoc(doc(db,"bookings",id),{status:"assigned", riderId: currentUser.uid});
-      alert("Booking Accepted!");
+      // ITO YUNG CONNECT KAY ADMIN AT CLINIC
+      await updateDoc(doc(db,"bookings",id),{
+        status:"Rider Assigned", // Ito yung hahanapin ni Admin at Clinic
+        riderId: currentUser.uid,
+        riderName: document.getElementById('fullName').value || "Rider",
+        riderPhone: document.getElementById('phone').value || ""
+      });
+      alert("Booking Accepted! Notifying Clinic...");
     }
 
-    // PROFILE
+    // 4. PROFILE SAVE
     async function loadProfile() {
       const docSnap = await getDoc(doc(db, "riders", currentUser.uid));
       if(docSnap.exists()) {
@@ -164,6 +209,7 @@
         document.getElementById('phone').value = data.phone || "";
         document.getElementById('plate').value = data.plate || "";
         document.getElementById('status').innerText = data.status || "pending";
+        document.getElementById('status').className = data.status === "approved" ? "text-green-400" : "text-yellow-400";
       }
     }
     document.getElementById('saveBtn').onclick = async () => {
@@ -173,18 +219,15 @@
         plate: document.getElementById('plate').value,
         email: currentUser.email
       }, {merge: true});
-      alert("Profile Saved!");
+      alert("Profile Saved! Wait for Admin approval");
     }
 
-    // NAV
     window.showPage = (pageId, el) => {
       document.querySelectorAll('#homePage, #bookingsPage, #earningsPage, #profilePage').forEach(p=>p.classList.add('hidden'));
       document.getElementById(pageId).classList.remove('hidden');
       document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
       el.classList.add('active');
     }
-
-    document.getElementById('logoutBtn').onclick = () => signOut(auth);
   </script>
 </body>
 </html>
