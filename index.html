@@ -1,117 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SafePaws Rider</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SafePaws Rider V2.9.3</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:white;font-family:Inter,system-ui}
-.card{background:rgba(30,41,59,.8);backdrop-filter:blur(10px);border:1px solid rgba(148,163,184,.1);border-radius:16px;padding:20px;margin-bottom:16px;transition:.3s}
-.card:hover{transform:translateY(-2px);border-color:rgba(34,197,94,.3)}
-.btn{padding:12px 20px;border-radius:12px;font-weight:600;cursor:pointer;transition:.2s;border:none;width:100%}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.btn-green{background:linear-gradient(135deg,#10b981,#059669);color:white}
-.btn-red{background:linear-gradient(135deg,#ef4444,#dc2626);color:white}
-.btn-yellow{background:linear-gradient(135deg,#f59e0b,#d97706);color:white}
-.btn-blue{background:linear-gradient(135deg,#3b82f6,#2563eb);color:white}
-.btn-purple{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:white}
-input{width:100%;padding:12px;border-radius:10px;background:#334155;color:white;border:1px solid #475569;margin:8px 0}
-input:focus{outline:none;border-color:#10b981}
-.badge{background:#ef4444;color:white;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:bold}
-.tab-btn{padding:10px;border-radius:10px;background:#334155;color:#94a3b8;font-weight:600}
-.tab-btn.active{background:#10b981;color:white}
-.emergency{border:2px solid #ef4444;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',Arial;background:#0f172a;color:#e5e7eb;overflow-y:auto}
+#splash{position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeCar .5s ease 1.2s forwards}
+#splash div{font-size:100px;animation:drive 1.2s ease-out forwards}
+@keyframes drive{0%{transform:translateX(200px);opacity:0}80%{opacity:1}100%{transform:translateX(0);opacity:1}}
+@keyframes fadeCar{0%{opacity:1}100%{opacity:0;visibility:hidden}}
+#loginScreen{display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#0f172a,#1e293b)}
+.login-card{background:#1e293b;padding:28px;border-radius:16px;width:90%;max-width:380px;border:1px solid #334155}
+.login-card h1{text-align:center;margin:0 0 16px}
+.login-card input{width:100%;padding:14px;margin:8px 0;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e5e7eb}
+.login-card button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:10px;background:#38bdf8;color:#0f172a;font-weight:bold;cursor:pointer}
+.link{color:#38bdf8;text-align:center;margin-top:10px;cursor:pointer}
+#appScreen{display:none;max-height:100vh;overflow-y:auto;padding-bottom:80px}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#1e293b;border-bottom:1px solid #334155;position:sticky;top:0;z-index:5}
+.logout{background:#dc2626;border:0;color:#fff;padding:8px 12px;border-radius:8px;font-weight:bold}
+.screen{display:none;padding:16px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:12px;text-align:left}
+.card.center{text-align:center;padding:40px 20px}
+.card input{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#e5e7eb}
+#map{height:250px;border-radius:12px;margin-top:12px;display:none}
+.btn{width:100%;padding:16px;border:0;border-radius:12px;background:#16a34a;color:#fff;font-weight:bold;font-size:16px;cursor:pointer;margin-top:8px}
+.btn.off{background:#dc2626}.btn.reject{background:#dc2626}.btn.blue{background:#38bdf8}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.status-card h2{font-size:32px;margin:0 0 10px}
+.pending{color:#f59e0b}.approved{color:#16a34a}.rejected{color:#dc2626}.active{color:#38bdf8}
+nav{position:fixed;bottom:0;left:0;right:0;background:#1e293b;border-top:1px solid #334155;display:flex;z-index:10}
+nav button{flex:1;padding:12px;background:0;border:0;color:#94a3b8;font-size:12px;cursor:pointer}
+nav button.active{color:#38bdf8;background:#0f172a}
+.tab{display:none}.tab.active{display:block}
+small{color:#94a3b8}
+.badge{background:#dc2626;color:#fff;padding:2px 6px;border-radius:50%;font-size:10px;margin-left:4px;vertical-align:top}
+.row{display:flex;justify-content:space-between;align-items:center;margin:6px 0}
+.muted{color:#94a3b8;font-size:14px;line-height:1.6}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.history-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #334155}
 </style>
 </head>
 <body>
-<div class="min-h-screen max-w-md mx-auto p-4">
+<div id="splash"><div>🚗</div></div>
 
-<!-- AUTH SCREEN -->
-<div id="authScreen">
-  <div class="text-center mb-6 pt-8">
-    <div class="text-5xl mb-2">🚚</div>
-    <h1 class="text-3xl font-bold">SafePaws Rider</h1>
-    <p class="text-slate-400">Deliver pets safely & fast</p>
-  </div>
-  
-  <div class="card">
-    <h2 class="font-bold text-lg mb-3">Login</h2>
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>🏍️ SafePaws Rider</h1>
     <input id="email" type="email" placeholder="Email">
     <input id="pass" type="password" placeholder="Password">
-    <button class="btn btn-green" onclick="login()">LOGIN</button>
+    <button onclick="login()">Login</button>
+    <div class="link" onclick="showSignup()">No account? Sign up</div>
   </div>
+</div>
 
-  <div class="card">
-    <h2 class="font-bold text-lg mb-3">Sign Up</h2>
+<div id="signupScreen" style="display:none">
+  <div class="login-card">
+    <h1>📝 Rider Signup</h1>
     <input id="name" placeholder="Full Name">
-    <input id="phone" placeholder="Phone Number">
+    <input id="phone" placeholder="Phone">
     <input id="plate" placeholder="Plate Number">
     <input id="suEmail" type="email" placeholder="Email">
     <input id="suPass" type="password" placeholder="Password">
-    <button class="btn btn-yellow" onclick="signup()">CREATE ACCOUNT</button>
+    <button onclick="signup()">Sign Up</button>
+    <div class="link" onclick="showLogin()">Back to Login</div>
   </div>
 </div>
 
-<!-- APPROVED SCREEN -->
-<div id="approvedScreen" style="display:none">
-  <div class="flex justify-between items-center mb-4">
-    <div>
-      <h1 class="text-2xl font-bold">Dashboard</h1>
-      <p class="text-slate-400 text-sm" id="riderName"></p>
-    </div>
-    <button class="btn btn-red w-auto px-4" onclick="logout()">Logout</button>
-  </div>
-
-  <div class="card">
-    <div class="flex justify-between items-center">
-      <div>
-        <p class="text-slate-400 text-sm">Status</p>
-        <p class="font-bold text-lg" id="riderStatus">pending</p>
+<div id="appScreen">
+  <header>
+    <h3 id="headerTitle">🏠 Home</h3>
+    <button class="logout" onclick="logout()">Logout</button>
+  </header>
+  <main>
+    <div id="homeTab" class="screen tab active">
+      <div id="pendingScreen" class="card center" style="display:none">
+        <h2 class="pending">⏳ Application Submitted</h2>
+        <p class="muted">Status: <b>Pending Review</b></p>
+        <div class="card" style="text-align:left;margin-top:20px">
+          <b>What happens next?</b>
+          <div class="muted" style="margin-top:8px">
+            1. Admin will review your documents in <b>24-48 hours</b><br>
+            2. You'll get notified here once approved<br>
+            3. You can go online after approval
+          </div>
+        </div>
+        <small>Need help? safepaws.support@gmail.com</small>
       </div>
-      <div class="text-right">
-        <p class="text-slate-400 text-sm">Today's Earnings</p>
-        <p class="font-bold text-lg text-green-400">₱<span id="earningsToday">0</span></p>
+
+      <div id="rejectedScreen" class="card center" style="display:none">
+        <h2 class="rejected">❌ Application Rejected</h2>
+        <p class="muted">Status: <b>Rejected</b></p>
+        <div class="card" style="text-align:left;margin-top:20px;background:#2c1a1a;border-color:#dc2626">
+          <b>Reason:</b> <span id="rejectReason" class="muted">Invalid documents</span>
+        </div>
+        <button class="btn" onclick="alert('Contact admin to resubmit')">Contact Admin</button>
+      </div>
+
+      <div id="approvedScreen" style="display:none">
+        <div id="approvedCard" class="card center" style="display:none">
+          <h2 class="approved">✅ You're Approved!</h2>
+          <p class="muted">Welcome to SafePaws, <span id="riderName"></span>!</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">Go Online</h3>
+          <button id="onlineBtn" class="btn off" onclick="toggleOnline()">OFFLINE</button>
+          <small id="onlineStatus">Tap to start accepting bookings</small>
+        </div>
+        <div id="map"></div>
       </div>
     </div>
-    <button id="onlineBtn" class="btn btn-purple mt-3" onclick="toggleOnline()">GO ONLINE</button>
-  </div>
 
-  <!-- TABS -->
-  <div class="flex gap-2 mb-4">
-    <button class="tab-btn active flex-1" onclick="switchTab('bookings')">Bookings</button>
-    <button class="tab-btn flex-1" onclick="switchTab('history')">History</button>
-  </div>
-
-  <!-- BOOKINGS TAB -->
-  <div id="bookingsTab">
-    <div class="flex items-center gap-2 mb-2">
-      <h2 class="font-bold text-lg">🔔 New Bookings</h2>
-      <span class="badge" id="bookingBadge" style="display:none">0</span>
+    <div id="bookingsTab" class="screen tab">
+      <div id="activeBooking"></div>
+      <div id="bookingsList"></div>
     </div>
-    <div id="bookingsList"><p class="text-slate-400">Loading...</p></div>
 
-    <h2 class="font-bold text-lg mt-4 mb-2">📦 Active Delivery</h2>
-    <div id="activeBooking"><p class="text-slate-400">No active booking</p></div>
-  </div>
+    <div id="earningsTab" class="screen tab">
+      <div class="grid-2">
+        <div class="card center"><h4>Today</h4><p id="earningsToday" style="font-size:24px;font-weight:bold;margin:8px 0">₱0.00</p></div>
+        <div class="card center"><h4>Total</h4><p id="earningsTotal" style="font-size:24px;font-weight:bold;margin:8px 0">₱0.00</p></div>
+      </div>
+      <div class="card">
+        <h3>📅 Earnings History</h3>
+        <div id="earningsHistory"></div>
+      </div>
+    </div>
 
-  <!-- HISTORY TAB -->
-  <div id="historyTab" style="display:none">
-    <h2 class="font-bold text-lg mb-2">📜 Delivery History</h2>
-    <div id="historyList"><p class="text-slate-400">No history yet</p></div>
-  </div>
+    <div id="profileTab" class="screen tab">
+      <div class="card">
+        <h3>👤 My Profile</h3>
+        <input id="pName" placeholder="Full Name">
+        <input id="pPhone" placeholder="Phone">
+        <input id="pPlate" placeholder="Plate Number">
+        <small>Status: <span id="pStatus"></span></small>
+        <button class="btn" style="margin-top:12px" onclick="saveProfile()">Save Changes</button>
+      </div>
+    </div>
+  </main>
+
+  <nav>
+    <button class="active" onclick="switchTab('homeTab',this)">🏠<br>Home</button>
+    <button onclick="switchTab('bookingsTab',this)">📦<br>Bookings<span id="bookingBadge" class="badge" style="display:none">0</span></button>
+    <button onclick="switchTab('earningsTab',this)">💰<br>Earnings</button>
+    <button onclick="switchTab('profileTab',this)">👤<br>Profile</button>
+  </nav>
 </div>
 
-</div>
-
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, query, where, onSnapshot, updateDoc, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// PALITAN MO ITO NG SAYO
 const firebaseConfig = {
   apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os",
   authDomain: "safepaws-batangas.firebaseapp.com",
@@ -125,176 +166,220 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+let map, marker, routeLine, uid, riderData, activeBookingId, currentPickup, currentDropoff;
 
-let uid = null;
-let riderData = null;
-let activeBookingId = null;
-
-// AUTH STATE
-onAuthStateChanged(auth, async (user)=>{
+onAuthStateChanged(auth, async user=>{
   if(user){
-    uid = user.uid;
-    const riderSnap = await getDoc(doc(db,'riders',uid));
-    if(riderSnap.exists()){
-      riderData = riderSnap.data();
-      document.getElementById('authScreen').style.display='none';
-      document.getElementById('approvedScreen').style.display='block';
-      document.getElementById('riderName').textContent = riderData.name;
-      document.getElementById('riderStatus').textContent = riderData.status;
-      document.getElementById('earningsToday').textContent = riderData.earningsToday || 0;
-      document.getElementById('onlineBtn').textContent = riderData.online ? 'GO OFFLINE' : 'GO ONLINE';
-      
-      if(riderData.status !== 'approved'){
-        alert("Waiting for admin approval");
-      } else {
-        listenBookings();
-        listenHistory();
-      }
-    }
-  } else {
-    document.getElementById('authScreen').style.display='block';
-    document.getElementById('approvedScreen').style.display='none';
+    uid=user.uid;
+    setTimeout(()=>{splash.style.display='none';},1700);
+    loginScreen.style.display='none'; signupScreen.style.display='none'; appScreen.style.display='block';
+    checkStatus(); listenBookings(); checkDailyReset();
+  }else{
+    splash.style.display='flex'; loginScreen.style.display='flex'; appScreen.style.display='none';
   }
 });
 
-// LOGIN
-window.login = async function(){
-  try{
-    const email = document.getElementById('email').value.trim();
-    const pass = document.getElementById('pass').value.trim();
-    if(!email || !pass) return alert('Please fill all fields');
-    await signInWithEmailAndPassword(auth, email, pass);
-  }catch(e){ alert("Login Error: " + e.message); }
+async function checkDailyReset(){
+  const today = new Date().toISOString().split('T')[0];
+  const ref = doc(db,'riders',uid);
+  const snap = await getDoc(ref);
+  if(snap.exists()){
+    const data = snap.data();
+    if(data.lastResetDate !== today){
+      await updateDoc(ref, {earningsToday:0, lastResetDate:today});
+    }
+  }
 }
 
-// SIGNUP
-window.signup = async function(){
-  try{
-    const nameVal = document.getElementById('name').value.trim();
-    const phoneVal = document.getElementById('phone').value.trim();
-    const plateVal = document.getElementById('plate').value.trim();
-    const emailVal = document.getElementById('suEmail').value.trim();
-    const passVal = document.getElementById('suPass').value.trim();
-    if(!nameVal || !phoneVal || !plateVal || !emailVal || !passVal) return alert('Please fill all fields');
-    const userCred = await createUserWithEmailAndPassword(auth, emailVal, passVal);
-    await setDoc(doc(db, 'riders', userCred.user.uid), {
-      uid: userCred.user.uid, name: nameVal, phone: phoneVal, plate: plateVal,
-      status: 'pending', online: false, earningsToday: 0, lastResetDate: new Date().toISOString().split('T')[0]
-    });
-    alert("Account created! Waiting for approval.");
-  }catch(e){ alert("Signup Error: " + e.message); }
-}
+async function checkStatus(){
+  const ref = doc(db,'riders',uid);
+  onSnapshot(ref, snap=>{
+    if(!snap.exists()) return;
+    riderData = snap.data();
+    pName.value = riderData.name || ''; pPhone.value = riderData.phone || ''; pPlate.value = riderData.plate || '';
+    pStatus.textContent = riderData.status || ''; riderName.textContent = riderData.name || 'Rider';
+    earningsToday.textContent = `₱${riderData.earningsToday||0}`; earningsTotal.textContent = `₱${riderData.earnings||0}`;
+    renderHistory(riderData.earningsHistory||[]);
 
-// LOGOUT
-window.logout = async function(){ await signOut(auth); }
-
-// TOGGLE ONLINE
-async function toggleOnline(){
-  const btn = document.getElementById('onlineBtn');
-  btn.disabled = true;
-  try{
-    const ref = doc(db,'riders',uid);
-    const snap = await getDoc(ref);
-    const on = !snap.data().online;
-    await updateDoc(ref,{online:on});
-    btn.textContent = on ? 'GO OFFLINE' : 'GO ONLINE';
-  }catch(e){ alert('Error: '+e.message); }
-  finally{ btn.disabled = false; }
-}
-window.toggleOnline = toggleOnline;
-
-// SWITCH TAB
-function switchTab(tab){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('bookingsTab').style.display = tab=='bookings'?'block':'none';
-  document.getElementById('historyTab').style.display = tab=='history'?'block':'none';
-  event.target.classList.add('active');
-}
-window.switchTab = switchTab;
-
-// LISTEN BOOKINGS
-function listenBookings(){
-  // NEW BOOKINGS
-  const qNew = query(collection(db, 'bookings'), where('status', '==', 'waiting_rider'));
-  onSnapshot(qNew, snap=>{
-    const list = document.getElementById('bookingsList');
-    list.innerHTML = "";
-    if(snap.empty) { list.innerHTML = "<p class='text-slate-400'>No new bookings</p>"; return; }
-    snap.forEach(d=>{
-      let b = d.data();
-      list.innerHTML += `
-        <div class="card ${b.isEmergency?'emergency':''}">
-          <div class="flex justify-between">
-            <h3 class="font-bold">${b.pet.name}</h3>
-            ${b.isEmergency?'<span class="text-red-400 font-bold">EMERGENCY</span>':''}
-          </div>
-          <p class="text-sm text-slate-400">From: ${b.customerName}</p>
-          <p class="text-sm">To: ${b.clinicName}</p>
-          <p class="font-bold mt-2">Fare: ₱${b.fare}</p>
-          <button class="btn btn-green mt-2" onclick="acceptBooking('${d.id}')">ACCEPT</button>
-        </div>`;
-    });
-  });
-
-  // MY ACTIVE BOOKING
-  const qMy = query(collection(db, 'bookings'), where('assignedRider', '==', uid));
-  onSnapshot(qMy, snap=>{
-    const bookings = snap.docs.map(d=>({id:d.id,...d.data()}));
-    const pending = bookings.filter(b=>b.status==='assigned');
-    document.getElementById('bookingBadge').style.display = pending.length>0?'inline-block':'none';
-    document.getElementById('bookingBadge').textContent = pending.length;
+    pendingScreen.style.display='none'; rejectedScreen.style.display='none'; approvedScreen.style.display='none';
     
-    const active = bookings.find(b=>['assigned','accepted','picking','on_the_way'].includes(b.status));
-    const div = document.getElementById('activeBooking');
+    if(riderData.status==='approved'){
+      approvedScreen.style.display='block';
+      const seenKey = 'seenStatus_'+uid;
+      if(!localStorage.getItem(seenKey)){
+        approvedCard.style.display='block';
+        localStorage.setItem(seenKey,'1');
+        setTimeout(()=>{approvedCard.style.display='none'},3000);
+      }
+      onlineBtn.disabled = false;
+      if(riderData.online){
+        onlineBtn.classList.remove('off'); onlineBtn.textContent='ONLINE';
+        onlineStatus.textContent='You are visible to customers';
+      }else{
+        onlineBtn.classList.add('off'); onlineBtn.textContent='OFFLINE';
+        onlineStatus.textContent='Tap to start accepting bookings';
+      }
+    }else if(riderData.status==='rejected'){
+      rejectedScreen.style.display='block';
+      rejectReason.textContent = riderData.rejectedReason || 'Invalid or incomplete documents';
+    }else{
+      pendingScreen.style.display='block';
+    }
+  });
+}
+
+function renderHistory(arr){
+  if(arr.length===0){ earningsHistory.innerHTML='<small class="muted">No history yet</small>'; return; }
+  earningsHistory.innerHTML = arr.slice().reverse().map(h=>`
+    <div class="history-item"><span>${h.date}</span><b>₱${h.amount}</b></div>
+  `).join('');
+}
+
+function listenBookings(){
+  const q = query(collection(db,'bookings'), where('assignedRider','==',uid));
+  onSnapshot(q, snap=>{
+    const bookings = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const active = bookings.find(b=>['assigned','accepted','picking'].includes(b.status));
+    const pending = bookings.filter(b=>b.status==='assigned');
+    bookingBadge.style.display = pending.length>0?'inline-block':'none'; bookingBadge.textContent = pending.length;
+
     if(active){
       activeBookingId = active.id;
-      let btn = '';
-      if(active.status=='assigned') btn = `<button class="btn btn-yellow" onclick="updateStatus('${active.id}','picking')">MARK AS PICKED UP</button>`;
-      if(active.status=='picking') btn = `<button class="btn btn-blue" onclick="updateStatus('${active.id}','on_the_way')">ARRIVED AT CLINIC</button>`;
-      div.innerHTML = `
-        <div class="card">
-          <h3 class="font-bold">${active.pet.name}</h3>
-          <p class="text-sm">Status: <b>${active.status}</b></p>
-          <p class="text-sm">Clinic: ${active.clinicName}</p>
-          ${btn}
-        </div>`;
-    } else { div.innerHTML = '<p class="text-slate-400">No active booking</p>'; }
-  });
-}
-
-// LISTEN HISTORY
-function listenHistory(){
-  const q = query(collection(db,'bookings'), where('assignedRider','==',uid), orderBy('createdAt','desc'));
-  onSnapshot(q, snap=>{
-    const div = document.getElementById('historyList');
-    const done = snap.docs.map(d=>({id:d.id,...d.data()})).filter(b=>b.status=='delivered');
-    if(done.length==0){ div.innerHTML='<p class="text-slate-400">No history yet</p>'; return; }
-    div.innerHTML = done.map(b=>`
-      <div class="card">
-        <h3 class="font-bold">${b.pet.name}</h3>
-        <p class="text-sm">₱${b.fare} - ${b.clinicName}</p>
-      </div>
+      currentPickup = active.pickupCoords;
+      currentDropoff = active.dropoffCoords;
+      activeBooking.innerHTML = `
+        <div class="card" style="border:2px solid #38bdf8">
+          <h3 class="active">🚨 ACTIVE BOOKING</h3>
+          <div class="row"><b>Customer:</b> ${active.customerName||'Customer'}</div>
+          <div class="row"><b>Phone:</b> <a href="tel:${active.customerPhone}" style="color:#38bdf8">${active.customerPhone||'-'}</a></div>
+          <div class="row"><b>Pet:</b> ${active.petName} - ${active.petBreed} (${active.petSize})</div>
+          <div class="row"><b>Pick-up:</b> ${active.pickup}</div>
+          <div class="row"><b>Drop-off:</b> ${active.dropoff}</div>
+          <div class="row"><b>Fee:</b> ₱${active.fee}</div>
+          ${active.status==='assigned'? `
+            <button class="btn" onclick="acceptBooking('${active.id}')">Accept</button>
+            <button class="btn reject" onclick="rejectBooking('${active.id}')">Reject</button>
+          ` : active.status==='accepted'? `
+            <button class="btn blue" onclick="showRoute()">Navigate</button>
+            <button class="btn" onclick="startTrip('${active.id}')">Start Trip</button>
+          ` : active.status==='picking'? `
+            <button class="btn blue" onclick="showRoute()">Navigate</button>
+            <button class="btn" onclick="completeTrip('${active.id}')">Complete Trip</button>
+          ` : ''}
+        </div>
+      `;
+    }else{
+      activeBooking.innerHTML = '<div class="card"><p>No active booking</p></div>';
+      if(map) { map.getContainer().style.display='none'; }
+    }
+    bookingsList.innerHTML = bookings.filter(b=>b.status==='completed').map(b=>`
+      <div class="card"><b>${b.petName}</b> - ${b.pickup} > ${b.dropoff}<br><small>₱${b.fee} | Completed</small></div>
     `).join('');
   });
 }
 
-// ACCEPT BOOKING
-window.acceptBooking = async function(bookingId){
-  await updateDoc(doc(db, 'bookings', bookingId), {
-    status: 'assigned', assignedRider: uid, riderName: riderData.name
+function showRoute(){
+  if(!map) initMap();
+  map.getContainer().style.display='block';
+  if(routeLine) map.removeLayer(routeLine);
+  if(currentPickup && currentDropoff){
+    L.marker(currentPickup).addTo(map).bindPopup('Pick-up');
+    L.marker(currentDropoff).addTo(map).bindPopup('Drop-off');
+    routeLine = L.polyline([currentPickup, currentDropoff], {color:'#38bdf8', weight:5}).addTo(map);
+    map.fitBounds(routeLine.getBounds());
+  }
+}
+
+async function acceptBooking(id){
+  await updateDoc(doc(db,'bookings',id),{status:'accepted'});
+  if(!map) initMap();
+  map.getContainer().style.display='block';
+}
+window.acceptBooking=acceptBooking;
+
+async function rejectBooking(id){
+  await updateDoc(doc(db,'bookings',id),{status:'rejected',assignedRider:null});
+}
+window.rejectBooking=rejectBooking;
+
+async function startTrip(id){
+  await updateDoc(doc(db,'bookings',id),{status:'picking'});
+}
+window.startTrip=startTrip;
+
+async function completeTrip(id){
+  const snap = await getDoc(doc(db,'bookings',id)); const fee = snap.data().fee || 0;
+  const today = new Date().toISOString().split('T')[0];
+  const newToday = (riderData.earningsToday||0)+fee;
+  const newTotal = (riderData.earnings||0)+fee;
+  const newHistory = [...(riderData.earningsHistory||[]), {date:today, amount:fee}];
+
+  await updateDoc(doc(db,'bookings',id),{status:'completed'});
+  await updateDoc(doc(db,'riders',uid),{
+    earnings:newTotal, earningsToday:newToday, earningsHistory:newHistory
+  });
+  alert(`Trip completed! +₱${fee}`);
+}
+window.completeTrip=completeTrip;
+
+async function saveProfile(){
+  await updateDoc(doc(db,'riders',uid),{name:pName.value,phone:pPhone.value,plate:pPlate.value});
+  alert('Profile Updated!');
+}
+window.saveProfile=saveProfile;
+
+async function signup(){
+  const cred=await createUserWithEmailAndPassword(auth,suEmail.value,suPass.value);
+  await setDoc(doc(db,'riders',cred.user.uid),{
+    name:name.value,phone:phone.value,plate:plate.value,email:suEmail.value,
+    status:'pending',online:false,earnings:0,earningsToday:0,earningsHistory:[],
+    lastResetDate:new Date().toISOString().split('T')[0],lat:null,lng:null,rejectedReason:''
+  });
+  alert('Signup success! Wait for admin approval.'); showLogin();
+}
+window.signup=signup;
+
+async function login(){
+  try{await signInWithEmailAndPassword(auth,email.value,pass.value);}
+  catch(e){alert(e.message);}
+}
+window.login=login;
+
+window.logout=()=>signOut(auth);
+window.showSignup=()=>{loginScreen.style.display='none';signupScreen.style.display='flex';}
+window.showLogin=()=>{signupScreen.style.display='none';loginScreen.style.display='flex';}
+
+function switchTab(id,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active'); btn.classList.add('active');
+  headerTitle.textContent=btn.innerText.split('\n')[0];
+}
+window.switchTab=switchTab;
+
+function initMap(){
+  if(map) return;
+  map=L.map('map').setView([13.96,121.12],13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  marker=L.marker([13.96,121.12]).addTo(map);
+  navigator.geolocation.watchPosition(p=>{
+    const {latitude:lat,longitude:lng}=p.coords;
+    marker.setLatLng([lat,lng]); map.setView([lat,lng]);
+    if(uid && riderData?.online) updateDoc(doc(db,'riders',uid),{lat,lng});
   });
 }
 
-// UPDATE STATUS
-window.updateStatus = async function(bookingId, newStatus){
-  await updateDoc(doc(db, 'bookings', bookingId), { status: newStatus });
-  if(newStatus == 'on_the_way'){ 
-    alert("Clinic has been notified!");
-  }
-  if(newStatus == 'delivered'){
-    // Add earnings logic here
-  }
+async function toggleOnline(){
+  onlineBtn.disabled = true;
+  try{
+    const ref=doc(db,'riders',uid);
+    const snap=await getDoc(ref);
+    const on=!snap.data().online;
+    await updateDoc(ref,{online:on});
+  }catch(e){ alert('Error: '+e.message); }
+  finally{ onlineBtn.disabled = false; }
 }
+window.toggleOnline=toggleOnline;
 </script>
 </body>
 </html>
