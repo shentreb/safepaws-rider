@@ -1,208 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SafePaws Rider</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:white;font-family:Inter,system-ui}
-.card{background:rgba(30,41,59,.8);backdrop-filter:blur(10px);border:1px solid rgba(148,163,184,.1);border-radius:16px;padding:20px;margin-bottom:16px}
-.btn{padding:12px 20px;border-radius:12px;font-weight:600;cursor:pointer;width:100%;border:none}
-.btn-green{background:linear-gradient(135deg,#10b981,#059669);color:white}
-.btn-red{background:linear-gradient(135deg,#ef4444,#dc2626);color:white}
-.btn-yellow{background:linear-gradient(135deg,#f59e0b,#d97706);color:white}
-.btn-purple{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:white}
-input{width:100%;padding:12px;border-radius:10px;background:#334155;color:white;border:1px solid #475569;margin:8px 0}
-.tab-btn{padding:10px;border-radius:10px;background:#334155;color:#94a3b8;font-weight:600;flex:1}
-.tab-btn.active{background:#10b981;color:white}
-.emergency{border:2px solid #ef4444;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafePaws Rider</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #0a0f1a; color: white; font-family: 'Segoe UI', sans-serif; }
+    .nav-item.active { color: #22d3ee; }
+    .nav-item { color: #64748b; }
+    .card { background: #1e293b; border-radius: 12px; padding: 20px; }
+  </style>
 </head>
-<body>
-<div class="min-h-screen max-w-md mx-auto p-4">
+<body class="pb-20">
 
-<!-- AUTH SCREEN - MALINIS NA -->
-<div id="authScreen">
-  <div class="text-center mb-6 pt-8">
-    <div class="text-5xl mb-2">🚚</div>
-    <h1 class="text-3xl font-bold">SafePaws Rider</h1>
-    <p class="text-slate-400">Deliver pets safely</p>
+  <!-- HEADER -->
+  <div class="flex justify-between items-center p-4">
+    <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" class="w-8">
+    <button id="logoutBtn" class="bg-red-600 px-4 py-1 rounded-lg font-bold text-sm">Logout</button>
   </div>
 
-  <div class="flex gap-2 mb-4">
-    <button id="loginTabBtn" class="tab-btn active" onclick="showAuthTab('login')">LOGIN</button>
-    <button id="signupTabBtn" class="tab-btn" onclick="showAuthTab('signup')">SIGN UP</button>
-  </div>
-  
-  <!-- LOGIN -->
-  <div id="loginForm" class="card">
-    <input id="email" type="email" placeholder="Email">
-    <input id="pass" type="password" placeholder="Password">
-    <button class="btn btn-green" onclick="login()">LOGIN</button>
-  </div>
-
-  <!-- SIGNUP -->
-  <div id="signupForm" class="card" style="display:none">
-    <input id="name" placeholder="Full Name">
-    <input id="phone" placeholder="Phone Number">
-    <input id="plate" placeholder="Plate Number">
-    <input id="suEmail" type="email" placeholder="Email">
-    <input id="suPass" type="password" placeholder="Password">
-    <button class="btn btn-yellow" onclick="signup()">CREATE ACCOUNT</button>
-  </div>
-</div>
-
-<!-- DASHBOARD -->
-<div id="approvedScreen" style="display:none">
-  <div class="flex justify-between items-center mb-4">
-    <div>
-      <h1 class="text-2xl font-bold">Dashboard</h1>
-      <p class="text-slate-400 text-sm" id="riderName"></p>
+  <!-- 1. HOME PAGE -->
+  <div id="homePage" class="p-4">
+    <h2 class="text-lg font-bold text-[#22d3ee] mb-3">Go Online</h2>
+    <div class="card">
+      <button id="goOnlineBtn" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl text-lg">
+        ONLINE
+      </button>
+      <p id="onlineText" class="text-gray-400 text-sm mt-2">Tap to start accepting bookings</p>
     </div>
-    <button class="btn btn-red w-auto px-4" onclick="logout()">Logout</button>
   </div>
 
-  <div class="card">
-    <div class="flex justify-between">
-      <div>
-        <p class="text-slate-400 text-sm">Status</p>
-        <p class="font-bold" id="riderStatus">pending</p>
+  <!-- 2. BOOKINGS PAGE -->
+  <div id="bookingsPage" class="p-4 hidden">
+    <h2 class="text-lg font-bold text-[#22d3ee] mb-3">No active booking</h2>
+    <div id="bookingList"></div>
+  </div>
+
+  <!-- 3. EARNINGS PAGE -->
+  <div id="earningsPage" class="p-4 hidden">
+    <h2 class="text-lg font-bold text-[#22d3ee] mb-3">Earnings</h2>
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="card text-center">
+        <p class="text-[#22d3ee] font-semibold">Today</p>
+        <p id="todayEarn" class="text-2xl font-bold">₱0</p>
       </div>
-      <div class="text-right">
-        <p class="text-slate-400 text-sm">Earnings Today</p>
-        <p class="font-bold text-green-400">₱<span id="earningsToday">0</span></p>
+      <div class="card text-center">
+        <p class="text-[#22d3ee] font-semibold">Total</p>
+        <p id="totalEarn" class="text-2xl font-bold">₱0</p>
       </div>
     </div>
-    <button id="onlineBtn" class="btn btn-purple mt-3" onclick="toggleOnline()">GO ONLINE</button>
+    <div class="card">
+      <p class="text-[#22d3ee] font-semibold mb-2">📄 Earnings History</p>
+      <p id="historyText" class="text-gray-400 text-sm">No history yet</p>
+    </div>
   </div>
 
-  <h2 class="font-bold text-lg mb-2">🔔 New Bookings</h2>
-  <div id="bookingsList"><p class="text-slate-400">Loading...</p></div>
+  <!-- 4. PROFILE PAGE -->
+  <div id="profilePage" class="p-4 hidden">
+    <h2 class="text-lg font-bold text-[#22d3ee] mb-3">👤 My Profile</h2>
+    <div class="card">
+      <input id="fullName" type="text" placeholder="Full Name" class="w-full p-3 bg-[#0a0f1a] rounded-lg mb-3">
+      <input id="phone" type="tel" placeholder="Phone" class="w-full p-3 bg-[#0a0f1a] rounded-lg mb-3">
+      <input id="plate" type="text" placeholder="Plate Number" class="w-full p-3 bg-[#0a0f1a] rounded-lg mb-3">
+      <p>Status: <span id="status" class="text-green-400">approved</span></p>
+      <button id="saveBtn" class="w-full bg-green-500 text-white font-bold py-3 rounded-xl mt-4">Save Changes</button>
+    </div>
+  </div>
 
-  <h2 class="font-bold text-lg mt-4 mb-2">📦 Active Delivery</h2>
-  <div id="activeBooking"><p class="text-slate-400">No active booking</p></div>
-</div>
+  <!-- BOTTOM NAV -->
+  <div class="fixed bottom-0 left-0 right-0 bg-[#1e293b] flex justify-around py-3">
+    <button class="nav-item active flex-col items-center" onclick="showPage('homePage', this)"><span>🏠</span><span class="text-xs">Home</span></button>
+    <button class="nav-item flex-col items-center" onclick="showPage('bookingsPage', this)"><span>📋</span><span class="text-xs">Bookings</span></button>
+    <button class="nav-item flex-col items-center" onclick="showPage('earningsPage', this)"><span>💰</span><span class="text-xs">Earnings</span></button>
+    <button class="nav-item flex-col items-center" onclick="showPage('profilePage', this)"><span>👤</span><span class="text-xs">Profile</span></button>
+  </div>
 
-</div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    
+    const firebaseConfig = { 
+      apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os",
+      authDomain: "safepaws-batangas.firebaseapp.com",
+      databaseURL: "https://safepaws-batangas-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "safepaws-batangas",
+      storageBucket: "safepaws-batangas.firebasestorage.app",
+      messagingSenderId: "629904615191",
+      appId: "1:629904615191:web:45f7148d65ba61a867f952"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, query, where, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    let isOnline = true;
+    let unsubBookings = null;
+    let currentUser = null;
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBVaqhNCrgDlWGEVjXygszJUdQR_bpG7os",
-  authDomain: "safepaws-batangas.firebaseapp.com",
-  databaseURL: "https://safepaws-batangas-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "safepaws-batangas",
-  storageBucket: "safepaws-batangas.firebasestorage.app",
-  messagingSenderId: "629904615191",
-  appId: "1:629904615191:web:45f7148d65ba61a867f952"
-};
+    // AUTH
+    onAuthStateChanged(auth, async user => {
+      if(!user) window.location.href = "login.html";
+      currentUser = user;
+      loadProfile();
+      listenToBookings();
+    });
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-let uid = null; let riderData = null;
-
-// SWITCH TAB LOGIN/SIGNUP
-function showAuthTab(tab){
-  document.getElementById('loginForm').style.display = tab=='login'?'block':'none';
-  document.getElementById('signupForm').style.display = tab=='signup'?'block':'none';
-  document.getElementById('loginTabBtn').classList.remove('active');
-  document.getElementById('signupTabBtn').classList.remove('active');
-  document.getElementById(tab+'TabBtn').classList.add('active');
-}
-window.showAuthTab = showAuthTab;
-
-// AUTH
-onAuthStateChanged(auth, async (user)=>{
-  if(user){
-    uid = user.uid;
-    const snap = await getDoc(doc(db,'riders',uid));
-    if(snap.exists()){
-      riderData = snap.data();
-      document.getElementById('authScreen').style.display='none';
-      document.getElementById('approvedScreen').style.display='block';
-      document.getElementById('riderName').textContent = riderData.name;
-      document.getElementById('riderStatus').textContent = riderData.status;
-      document.getElementById('earningsToday').textContent = riderData.earningsToday || 0;
-      document.getElementById('onlineBtn').textContent = riderData.online ? 'GO OFFLINE' : 'GO ONLINE';
-      if(riderData.status == 'approved'){ listenBookings(); }
-      else{ alert("Waiting for admin approval"); }
+    // GO ONLINE / OFFLINE
+    const goBtn = document.getElementById('goOnlineBtn');
+    goBtn.onclick = () => {
+      isOnline = !isOnline;
+      if(isOnline) {
+        goBtn.classList.replace('bg-red-500','bg-green-500');
+        goBtn.innerText = "ONLINE";
+        document.getElementById('onlineText').innerText = "Tap to start accepting bookings";
+        listenToBookings();
+      } else {
+        goBtn.classList.replace('bg-green-500','bg-red-500');
+        goBtn.innerText = "OFFLINE";
+        document.getElementById('onlineText').innerText = "You are offline";
+        if(unsubBookings) unsubBookings();
+      }
     }
-  } else {
-    document.getElementById('authScreen').style.display='block';
-    document.getElementById('approvedScreen').style.display='none';
-  }
-});
 
-// LOGIN
-window.login = async () => {
-  try{
-    await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value);
-  }catch(e){ alert("Error: " + e.message); }
-}
+    // LISTEN BOOKINGS
+    function listenToBookings() {
+      if(!isOnline) return;
+      const q = query(collection(db, "bookings"), where("status", "in", ["waiting_rider", "emergency", "assigned"]));
+      unsubBookings = onSnapshot(q, snap=>{
+        const list = document.getElementById('bookingList');
+        list.innerHTML = "";
+        if(snap.empty) {
+          document.getElementById('bookingsPage').querySelector('h2').innerText = "No active booking";
+          return;
+        }
+        document.getElementById('bookingsPage').querySelector('h2').innerText = "Incoming Bookings";
+        snap.forEach(d=>{
+          const b = d.data();
+          list.innerHTML += `
+          <div class="card mb-3">
+            <p><b>${b.type}</b> ${b.status==='emergency'?'🚨':''}</p>
+            <p>Pet: ${b.petName || b.pet?.name}</p>
+            <p>Fare: ${b.fare}</p>
+            ${b.status === 'waiting_rider' || b.status === 'emergency' ? 
+            `<button onclick="acceptBooking('${d.id}')" class="bg-[#22d3ee] text-black font-bold px-4 py-2 rounded mt-2 w-full">ACCEPT</button>` : 
+            `<p class="text-green-400">Accepted</p>`}
+          </div>`
+        })
+      });
+    }
 
-// SIGNUP
-window.signup = async () => {
-  try{
-    const cred = await createUserWithEmailAndPassword(auth, document.getElementById('suEmail').value, document.getElementById('suPass').value);
-    await setDoc(doc(db, 'riders', cred.user.uid), {
-      uid: cred.user.uid, name: document.getElementById('name').value, phone: document.getElementById('phone').value, 
-      plate: document.getElementById('plate').value, status: 'pending', online: false, earningsToday: 0
-    });
-    alert("Account created! Wait for approval.");
-  }catch(e){ alert("Error: " + e.message); }
-}
+    window.acceptBooking = async (id) => {
+      await updateDoc(doc(db,"bookings",id),{status:"assigned", riderId: currentUser.uid});
+      alert("Booking Accepted!");
+    }
 
-// LOGOUT
-window.logout = async () => { await signOut(auth); }
+    // PROFILE
+    async function loadProfile() {
+      const docSnap = await getDoc(doc(db, "riders", currentUser.uid));
+      if(docSnap.exists()) {
+        const data = docSnap.data();
+        document.getElementById('fullName').value = data.fullName || "";
+        document.getElementById('phone').value = data.phone || "";
+        document.getElementById('plate').value = data.plate || "";
+        document.getElementById('status').innerText = data.status || "pending";
+      }
+    }
+    document.getElementById('saveBtn').onclick = async () => {
+      await setDoc(doc(db, "riders", currentUser.uid), {
+        fullName: document.getElementById('fullName').value,
+        phone: document.getElementById('phone').value,
+        plate: document.getElementById('plate').value,
+        email: currentUser.email
+      }, {merge: true});
+      alert("Profile Saved!");
+    }
 
-// TOGGLE ONLINE
-window.toggleOnline = async () => {
-  const ref = doc(db,'riders',uid);
-  const snap = await getDoc(ref);
-  const on = !snap.data().online;
-  await updateDoc(ref,{online:on});
-  document.getElementById('onlineBtn').textContent = on ? 'GO OFFLINE' : 'GO ONLINE';
-}
+    // NAV
+    window.showPage = (pageId, el) => {
+      document.querySelectorAll('#homePage, #bookingsPage, #earningsPage, #profilePage').forEach(p=>p.classList.add('hidden'));
+      document.getElementById(pageId).classList.remove('hidden');
+      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+      el.classList.add('active');
+    }
 
-// LISTEN BOOKINGS
-function listenBookings(){
-  onSnapshot(query(collection(db, 'bookings'), where('status', '==', 'waiting_rider')), snap=>{
-    const list = document.getElementById('bookingsList');
-    list.innerHTML = snap.empty ? "<p class='text-slate-400'>No new bookings</p>" : "";
-    snap.forEach(d=>{
-      let b = d.data();
-      list.innerHTML += `<div class="card ${b.isEmergency?'emergency':''}">
-        <h3 class="font-bold">${b.pet.name}</h3><p>To: ${b.clinicName}</p><p>₱${b.fare}</p>
-        <button class="btn btn-green mt-2" onclick="acceptBooking('${d.id}')">ACCEPT</button></div>`;
-    });
-  });
-
-  onSnapshot(query(collection(db, 'bookings'), where('assignedRider', '==', uid)), snap=>{
-    const active = snap.docs.map(d=>({id:d.id,...d.data()})).find(b=>['assigned','picking'].includes(b.status));
-    const div = document.getElementById('activeBooking');
-    if(active){
-      let btn = active.status=='assigned' ? `<button class="btn btn-yellow" onclick="updateStatus('${active.id}','picking')">PICKED UP</button>` : 
-                `<button class="btn btn-purple" onclick="updateStatus('${active.id}','on_the_way')">ARRIVED AT CLINIC</button>`;
-      div.innerHTML = `<div class="card"><h3 class="font-bold">${active.pet.name}</h3><p>Status: ${active.status}</p>${btn}</div>`;
-    } else { div.innerHTML = '<p class="text-slate-400">No active booking</p>'; }
-  });
-}
-
-// ACCEPT + UPDATE
-window.acceptBooking = async (id) => {
-  await updateDoc(doc(db, 'bookings', id), {status: 'assigned', assignedRider: uid, riderName: riderData.name});
-}
-window.updateStatus = async (id, status) => {
-  await updateDoc(doc(db, 'bookings', id), {status: status});
-  if(status == 'on_the_way'){ alert("Clinic Notified!"); }
-}
-</script>
+    document.getElementById('logoutBtn').onclick = () => signOut(auth);
+  </script>
 </body>
 </html>
